@@ -52,22 +52,37 @@ user-confirmed decision — not an oversight.
 
 ## Quick start (local development)
 
-You need **Java 21**, **Maven**, **Node.js 18+**, and **Docker Desktop** (or a local
-PostgreSQL 17 instance).
+You need **Node.js 18+** and **Docker Desktop**. If you'd rather run the backend directly
+instead of through Docker (faster rebuild loop while editing backend code), you also need
+**Java 21** and **Maven** — that's option B below.
 
-1. **Start the database and backend**
+1. **Start the backend**
+
+   **Option A — fully containerized, no Java/Maven required (recommended if you're only
+   running the app, not editing backend code):**
+
+   ```bash
+   cd monomates-api
+   docker compose up -d --build
+   ```
+
+   This starts both PostgreSQL and the API in Docker. First run takes a minute to build the
+   image. Verify: `http://localhost:8081/api/v1/status` and `http://localhost:8081/actuator/health`.
+
+   **Option B — Postgres in Docker, API run directly (faster edit/rebuild loop):**
 
    ```bash
    cd monomates-api
    docker compose up -d postgres
-   cp .env.example .env   # adjust if needed; defaults work for local Docker Postgres
+   cp .env.example .env   # defaults work as-is for local Docker Postgres
    mvn spring-boot:run
    ```
 
    Verify: `http://localhost:8080/api/v1/status` and `http://localhost:8080/actuator/health`.
 
-   Demo accounts (local profile only): `user@monomates.local` / `User123!`,
-   `admin@monomates.local` / `Admin123!`. Full details in `monomates-api/README.md`.
+   Either way, demo accounts (local profile only) are ready to use:
+   `user@monomates.local` / `User123!`, `admin@monomates.local` / `Admin123!`.
+   Full details in `monomates-api/README.md`.
 
 2. **Start the frontend**
 
@@ -80,9 +95,8 @@ PostgreSQL 17 instance).
 
    Open the printed local URL (typically `http://localhost:5173`).
 
-   - Backend run directly with `mvn spring-boot:run` → `VITE_API_BASE_URL=http://localhost:8080/api/v1`
-   - Backend run via `docker compose` in this repo → `VITE_API_BASE_URL=http://localhost:8081/api/v1`
-     (the compose file publishes the API on host port `8081`)
+   - Backend started with Option A (`docker compose`) → `VITE_API_BASE_URL=http://localhost:8081/api/v1`
+   - Backend started with Option B (`mvn spring-boot:run`) → `VITE_API_BASE_URL=http://localhost:8080/api/v1`
 
 3. **Run the whole flow without real hardware**
 
@@ -102,7 +116,7 @@ cd monomates-frontend && npm run build   # frontend production build
 cd monomates-api && mvn test             # backend suite (point DATABASE_URL at an isolated DB first)
 ```
 
-## Security notes before publishing
+## Security notes
 
 - Never commit any `.env` file. Both `.gitignore` files in this repo (root and per-module)
   already exclude `.env*` except `.env.example`.
