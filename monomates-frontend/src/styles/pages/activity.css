@@ -1,0 +1,100 @@
+.summary {
+    display: grid;
+    gap: 14px
+}
+
+.alist {
+    display: grid;
+    gap: 12px
+}
+
+.activity {
+    padding: 0;
+    overflow: hidden
+}
+
+.amain {
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 17px;
+    cursor: pointer
+}
+
+.aicon {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: #f0fdf4;
+    color: #15803d;
+    display: grid;
+    place-items: center
+}
+
+.details2 {
+    display: none;
+    padding: 0 17px 17px
+}
+
+.activity.open .details2 {
+    display: block
+}
+
+.amount {
+    font-size: 18px;
+    font-weight: 900
+}
+
+@media(min-width:800px) {
+    .summary {
+        grid-template-columns: repeat(3, 1fr)
+    }
+}
+
+
+/* MonoMates brand */
+.brand {
+    gap: 9px;
+}
+
+.brand-logo {
+    width: 70px;
+    height: 46px;
+    object-fit: contain;
+    flex: 0 0 auto;
+}
+
+.brand-name {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.7px;
+}
+
+.brand-name .mono {
+    color: #064e3b;
+}
+
+.brand-name .mates {
+    color: #2e9f4d;
+}
+
+.sidebar .brand {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+@media (max-width: 360px) {
+    .brand-logo {
+        width: 58px;
+        height: 40px;
+    }
+
+    .brand-name {
+        font-size: 19px;
+    }
+}

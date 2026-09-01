@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>
+   Deposit session — MonoMates
+  </title>
+
+
+<link href="../../src/styles/main.css" rel="stylesheet"/><link href="../../src/styles/pages/deposit.css" rel="stylesheet"/><link href="../../public/manifest.webmanifest" rel="manifest"/></head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a aria-label="MonoMates home" class="brand" href="../../index.html">
+<img alt="MonoMates logo" class="brand-logo" src="../../src/assets/images/logo/monomates-logo.png"/>
+<span class="brand-name">
+<span class="mono">
+       Mono
+      </span>
+<span class="mates">
+       Mates
+      </span>
+</span>
+</a>
+<div class="navlabel">
+     Explore
+    </div>
+<nav class="nav">
+<a class="" href="../bins/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z">
+</path>
+<path d="M9 3v15M15 6v15">
+</path>
+</svg>
+<span>
+       Find bins
+      </span>
+</a>
+<a class="" href="../rewards/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<rect height="4" rx="1" width="18" x="3" y="8">
+</rect>
+<path d="M12 8v13M19 12v9H5v-9M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5">
+</path>
+</svg>
+<span>
+       Rewards
+      </span>
+</a>
+<a class="" href="../activity/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M3 12a9 9 0 1 0 3-6.7L3 8V3h5M12 7v5l4 2">
+</path>
+</svg>
+<span>
+       Activity
+      </span>
+</a>
+<a class="" href="../profile/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2">
+</path>
+<circle cx="12" cy="7" r="4">
+</circle>
+</svg>
+<span>
+       Profile
+      </span>
+</a>
+</nav>
+<div class="navlabel">
+     Prototype
+    </div>
+<nav class="nav">
+<a href="../admin/bins.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Zm-3-10 2 2 4-4">
+</path>
+</svg>
+<span>
+       Administration
+      </span>
+</a>
+</nav>
+<div class="user-mini">
+<div class="avatar">
+      LC
+     </div>
+<div>
+<b>
+       Loading…
+      </b>
+<div class="tiny muted">
+       Member
+      </div>
+</div>
+</div>
+</aside>
+<div class="main">
+<header class="topbar">
+<div>
+<h1>
+       Deposit session
+      </h1>
+<div class="subtitle">
+       Hardware-linked token earning flow
+      </div>
+</div>
+<div class="topactions">
+<a class="tokenpill" href="../activity/index.html">
+<svg aria-hidden="true" class="ico sm" viewbox="0 0 24 24">
+<circle cx="8" cy="8" r="6">
+</circle>
+<path d="M18.1 10.4A6 6 0 1 1 10.4 18.1M7 6h1v4M16.7 13.9l.7.7-2.8 2.8">
+</path>
+</svg>
+       — PT
+      </a>
+<button class="iconbtn" onclick="toast('No new notifications.')">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M10.3 21a1.94 1.94 0 0 0 3.4 0M4 17h16M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9">
+</path>
+</svg>
+</button>
+<a class="iconbtn" href="../profile/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2">
+</path>
+<circle cx="12" cy="7" r="4">
+</circle>
+</svg>
+</a>
+</div>
+</header>
+<main class="content">
+<a class="ghost" href="../bins/detail.html" id="backToBinLink" style="padding-left:0">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="m12 19-7-7 7-7M19 12H5">
+</path>
+</svg>
+      Back to bin details
+     </a>
+<section class="sessiongrid" style="margin-top:12px">
+<article class="card session">
+<span class="badge blue" id="badge">
+        Starting session…
+       </span>
+<div class="visual waiting" id="vis" style="margin-top:20px">
+<svg aria-hidden="true" class="ico xl" viewbox="0 0 24 24">
+<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10">
+</path>
+</svg>
+</div>
+<h2 id="title" style="font-size:36px;letter-spacing:-.04em;margin:0">
+        Preparing your deposit session
+       </h2>
+<p class="muted" id="msg">
+        Contacting the bin securely…
+       </p>
+<div class="hidden" id="timer">
+<div class="small" style="display:flex;justify-content:space-between">
+<span class="muted">
+          Time remaining
+         </span>
+<b id="ttext">
+          60 seconds
+         </b>
+</div>
+<div class="progress" style="height:11px;margin-top:8px">
+<div class="bar" id="tbar" style="width:100%">
+</div>
+</div>
+</div>
+<div class="hidden" id="reward">
+<div class="reward" id="amount">
+         +2 PT
+        </div>
+<div class="small muted">
+         Added to your Plastique Token balance
+        </div>
+<div class="detail" id="breakdown" style="max-width:460px;margin:20px auto 0;text-align:left">
+</div>
+</div>
+<div class="card" style="box-shadow:none;background:#f8fafc;text-align:left;margin-top:20px">
+<span id="note">
+         Please wait while the session is created.
+        </span>
+</div>
+<div class="rowbtn" id="actions" style="justify-content:center;margin-top:20px">
+<button class="btndanger" disabled>
+         Starting…
+        </button>
+</div>
+</article>
+<aside class="grid controls">
+<div class="card">
+<h3 class="ctitle">
+         Session timeline
+        </h3>
+<div class="timeline" style="margin-top:16px">
+<div>
+<b>
+           QR scanned
+          </b>
+<div class="small muted">
+           Session created
+          </div>
+</div>
+<div>
+<b id="line2">
+           Starting session
+          </b>
+<div class="small muted" id="line2m">
+           Waiting for API response
+          </div>
+</div>
+<div>
+<b class="muted" id="line3">
+           Reward decision
+          </b>
+<div class="small muted" id="line3m">
+           Pending hardware event
+          </div>
+</div>
+</div>
+</div>
+</aside>
+</section>
+</main>
+</div>
+<nav class="bottom">
+<a class="" href="../bins/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z">
+</path>
+<path d="M9 3v15M15 6v15">
+</path>
+</svg>
+<span>
+      Bins
+     </span>
+</a>
+<a class="" href="../rewards/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<rect height="4" rx="1" width="18" x="3" y="8">
+</rect>
+<path d="M12 8v13M19 12v9H5v-9M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5">
+</path>
+</svg>
+<span>
+      Rewards
+     </span>
+</a>
+<a class="active" href="session.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<rect height="5" rx="1" width="5" x="3" y="3">
+</rect>
+<rect height="5" rx="1" width="5" x="16" y="3">
+</rect>
+<rect height="5" rx="1" width="5" x="3" y="16">
+</rect>
+<path d="M21 16h-3a2 2 0 0 0-2 2v3M21 21h.01M12 7v3a2 2 0 0 1-2 2H7M12 16h.01M16 12h1M21 12h.01">
+</path>
+</svg>
+<span>
+      Scan
+     </span>
+</a>
+<a class="" href="../activity/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M3 12a9 9 0 1 0 3-6.7L3 8V3h5M12 7v5l4 2">
+</path>
+</svg>
+<span>
+      Activity
+     </span>
+</a>
+<a class="" href="../profile/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2">
+</path>
+<circle cx="12" cy="7" r="4">
+</circle>
+</svg>
+<span>
+      Profile
+     </span>
+</a>
+</nav>
+</div>
+<div class="toast" id="toast">
+</div>
+
+
+<script src="../../src/scripts/app.js" type="module"></script><script src="../../src/scripts/pages/deposit-session-page.js" type="module"></script></body>
+</html>

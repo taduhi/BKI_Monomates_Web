@@ -1,0 +1,27 @@
+event_id	user_email	bin_code	days_ago	local_time	outcome	weight_grams	classification_confidence
+DEMO-EVT-001	user@monomates.local	BIN-HCMUT-001	9	14:30	ACCEPTED_PET	24.5	0.96
+DEMO-EVT-002	user@monomates.local	BIN-YOUTH-001	11	11:12	ACCEPTED_PET	21.8	0.93
+DEMO-EVT-003	user@monomates.local	BIN-HCMUT-001	6	09:18	VALID_UNCERTAIN	18.4	0.42
+DEMO-EVT-004	user@monomates.local	BIN-LIBRARY-001	4	17:05	ACCEPTED_PET	26.1	0.89
+DEMO-EVT-005	user@monomates.local	BIN-YOUTH-001	2	13:40	REJECTED	0.0	
+DEMO-EVT-006	user@monomates.local	BIN-HCMUT-001	1	08:25	ACCEPTED_PET	23.7	0.97
+DEMO-EVT-007	linh.demo@monomates.local	BIN-HCMUT-001	20	08:10	ACCEPTED_PET	25.0	0.94
+DEMO-EVT-008	linh.demo@monomates.local	BIN-YOUTH-001	18	16:20	VALID_UNCERTAIN	17.5	0.51
+DEMO-EVT-009	linh.demo@monomates.local	BIN-LIBRARY-001	15	12:05	ACCEPTED_PET	22.9	0.91
+DEMO-EVT-010	linh.demo@monomates.local	BIN-HCMUT-001	12	10:45	ACCEPTED_PET	24.1	0.95
+DEMO-EVT-011	linh.demo@monomates.local	BIN-YOUTH-001	8	18:10	REJECTED	2.0	
+DEMO-EVT-012	linh.demo@monomates.local	BIN-HCMUT-001	3	07:55	ACCEPTED_PET	25.4	0.92
+DEMO-EVT-013	nam.demo@monomates.local	BIN-YOUTH-001	21	09:15	ACCEPTED_PET	20.8	0.88
+DEMO-EVT-014	nam.demo@monomates.local	BIN-HCMUT-001	19	13:25	ACCEPTED_PET	23.2	0.90
+DEMO-EVT-015	nam.demo@monomates.local	BIN-LIBRARY-001	14	15:50	VALID_UNCERTAIN	19.0	0.39
+DEMO-EVT-016	nam.demo@monomates.local	BIN-YOUTH-001	10	11:30	ACCEPTED_PET	22.6	0.96
+DEMO-EVT-017	nam.demo@monomates.local	BIN-HCMUT-001	7	17:35	ACCEPTED_PET	24.7	0.93
+DEMO-EVT-018	nam.demo@monomates.local	BIN-YOUTH-001	1	19:05	REJECTED	0.0	
+DEMO-EVT-019	mai.demo@monomates.local	BIN-HCMUT-001	24	07:40	ACCEPTED_PET	23.9	0.95
+DEMO-EVT-020	mai.demo@monomates.local	BIN-YOUTH-001	22	12:20	ACCEPTED_PET	21.7	0.91
+DEMO-EVT-021	mai.demo@monomates.local	BIN-LIBRARY-001	17	14:10	ACCEPTED_PET	26.4	0.94
+DEMO-EVT-022	mai.demo@monomates.local	BIN-HCMUT-001	13	09:05	VALID_UNCERTAIN	18.8	0.48
+DEMO-EVT-023	mai.demo@monomates.local	BIN-YOUTH-001	9	16:45	ACCEPTED_PET	22.1	0.97
+DEMO-EVT-024	mai.demo@monomates.local	BIN-LIBRARY-001	5	10:25	ACCEPTED_PET	25.8	0.90
+DEMO-EVT-025	mai.demo@monomates.local	BIN-HCMUT-001	2	18:15	ACCEPTED_PET	24.0	0.92
+DEMO-EVT-026	mai.demo@monomates.local	BIN-YOUTH-001	1	08:50	VALID_UNCERTAIN	17.9	0.44

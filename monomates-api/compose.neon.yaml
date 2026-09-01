@@ -1,0 +1,11 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: monomates-api-neon
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8081:8080"

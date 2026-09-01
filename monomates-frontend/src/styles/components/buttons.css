@@ -1,0 +1,33 @@
+.btn, .btn2, .btndanger, .ghost {
+  min-height: 48px;
+  padding: 12px 18px;
+  border-radius: var(--radius-button);
+  font-weight: 750;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: 0.18s;
+}
+.btn { background: var(--primary); color: #fff; border: 1px solid var(--primary); }
+.btn:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 10px 20px rgba(37, 99, 235, 0.18); }
+.btn2 { background: #fff; color: var(--text-primary); border: 1px solid var(--border); }
+.btn2:hover { background: #f1f5f9; }
+.btndanger { background: var(--danger); color: #fff; border: 1px solid var(--danger); }
+.ghost { background: transparent; color: var(--text-secondary); border: 1px solid transparent; }
+.rowbtn { display: flex; flex-wrap: wrap; gap: 10px; }
+.rowbtn > * { flex: 1 1 auto; }
+.disabled, button:disabled { opacity: 0.48; pointer-events: none; }
+.iconbtn {
+  width: 42px; height: 42px; border: 1px solid var(--border); border-radius: 12px;
+  background: #fff; color: var(--text-secondary); display: grid; place-items: center;
+  cursor: pointer; transition: 0.18s;
+}
+.iconbtn:hover { transform: translateY(-1px); box-shadow: var(--shadow); color: var(--text-primary); }
+.fab {
+  position: fixed; right: 18px; bottom: 94px; z-index: 55; width: 58px; height: 58px;
+  border: 0; border-radius: 18px; display: grid; place-items: center;
+  background: var(--primary); color: #fff; box-shadow: 0 14px 30px rgba(37, 99, 235, 0.28);
+}
+@media (min-width: 680px) { .rowbtn > * { flex: 0 0 auto; } }

@@ -1,0 +1,131 @@
+.auth {
+    min-height: 100vh;
+    display: grid;
+    background: #fff
+}
+
+.authvisual {
+    display: none
+}
+
+.authpanel {
+    min-height: 100vh;
+    padding: 22px;
+    display: flex;
+    flex-direction: column
+}
+
+.authbox {
+    width: min(100%, 430px);
+    margin: auto
+}
+
+.authbox h1 {
+    font-size: 32px;
+    letter-spacing: -.04em;
+    margin: 0
+}
+
+.form {
+    display: grid;
+    gap: 16px;
+    margin-top: 20px
+}
+
+.field-error {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #fef2f2;
+    color: var(--danger);
+    font-size: 14px
+}
+
+.pw {
+    position: relative
+}
+
+.pw button {
+    position: absolute;
+    right: 7px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    color: var(--text-secondary)
+}
+
+@media(min-width:900px) {
+    .auth {
+        grid-template-columns: 1.08fr .92fr
+    }
+
+    .authvisual {
+        display: flex;
+        padding: 64px;
+        align-items: center;
+        background: #eff6ff
+    }
+
+    .authvisual h2 {
+        font-size: 58px;
+        line-height: 1.02;
+        letter-spacing: -.055em;
+        margin: 0
+    }
+
+    .authpanel {
+        padding: 30px 46px
+    }
+}
+
+
+/* MonoMates brand */
+.brand {
+    gap: 9px;
+}
+
+.brand-logo {
+    width: 70px;
+    height: 46px;
+    object-fit: contain;
+    flex: 0 0 auto;
+}
+
+.brand-name {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.7px;
+}
+
+.brand-name .mono {
+    color: #064e3b;
+}
+
+.brand-name .mates {
+    color: #2e9f4d;
+}
+
+.sidebar .brand {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+@media (max-width: 360px) {
+    .brand-logo {
+        width: 58px;
+        height: 40px;
+    }
+
+    .brand-name {
+        font-size: 19px;
+    }
+}

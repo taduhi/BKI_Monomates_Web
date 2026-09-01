@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>
+   Profile — MonoMates
+  </title>
+
+
+<link href="../../src/styles/main.css" rel="stylesheet"/><link href="../../src/styles/pages/profile.css" rel="stylesheet"/><link href="../../public/manifest.webmanifest" rel="manifest"/></head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a aria-label="MonoMates home" class="brand" href="../../index.html">
+<img alt="MonoMates logo" class="brand-logo" src="../../src/assets/images/logo/monomates-logo.png"/>
+<span class="brand-name">
+<span class="mono">
+       Mono
+      </span>
+<span class="mates">
+       Mates
+      </span>
+</span>
+</a>
+<div class="navlabel">
+     Explore
+    </div>
+<nav class="nav">
+<a class="" href="../bins/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z">
+</path>
+<path d="M9 3v15M15 6v15">
+</path>
+</svg>
+<span>
+       Find bins
+      </span>
+</a>
+<a class="" href="../rewards/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<rect height="4" rx="1" width="18" x="3" y="8">
+</rect>
+<path d="M12 8v13M19 12v9H5v-9M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5">
+</path>
+</svg>
+<span>
+       Rewards
+      </span>
+</a>
+<a class="" href="../activity/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M3 12a9 9 0 1 0 3-6.7L3 8V3h5M12 7v5l4 2">
+</path>
+</svg>
+<span>
+       Activity
+      </span>
+</a>
+<a class="active" href="index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2">
+</path>
+<circle cx="12" cy="7" r="4">
+</circle>
+</svg>
+<span>
+       Profile
+      </span>
+</a>
+</nav>
+<div class="navlabel">
+     Prototype
+    </div>
+<nav class="nav">
+<a href="../admin/bins.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Zm-3-10 2 2 4-4">
+</path>
+</svg>
+<span>
+       Administration
+      </span>
+</a>
+</nav>
+<div class="user-mini">
+<div class="avatar">
+      LC
+     </div>
+<div>
+<b>
+       Loading…
+      </b>
+<div class="tiny muted">
+       Member
+      </div>
+</div>
+</div>
+</aside>
+<div class="main">
+<header class="topbar">
+<div>
+<h1>
+       Profile
+      </h1>
+<div class="subtitle">
+       Manage simple account information and preferences
+      </div>
+</div>
+<div class="topactions">
+<a class="tokenpill" href="../activity/index.html">
+<svg aria-hidden="true" class="ico sm" viewbox="0 0 24 24">
+<circle cx="8" cy="8" r="6">
+</circle>
+<path d="M18.1 10.4A6 6 0 1 1 10.4 18.1M7 6h1v4M16.7 13.9l.7.7-2.8 2.8">
+</path>
+</svg>
+       — PT
+      </a>
+<button class="iconbtn" onclick="toast('No new notifications.')">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M10.3 21a1.94 1.94 0 0 0 3.4 0M4 17h16M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9">
+</path>
+</svg>
+</button>
+<a class="iconbtn" href="index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2">
+</path>
+<circle cx="12" cy="7" r="4">
+</circle>
+</svg>
+</a>
+</div>
+</header>
+<main class="content">
+<section class="profilegrid">
+<aside class="grid">
+<div class="card" style="text-align:center">
+<div class="pavatar" id="profileAvatar">
+         LC
+        </div>
+<h2 id="profileName" style="margin:0">
+         Loading…
+        </h2>
+<div class="small muted" id="profileEmail">
+         Loading account…
+        </div>
+<span class="badge green" id="profileStatus" style="margin-top:12px">
+         Active member
+        </span>
+<div class="divider">
+</div>
+<div class="grid g2">
+<div>
+<div class="metricvalue" id="profileTokens">
+           —
+          </div>
+<div class="metriclabel">
+           Tokens
+          </div>
+</div>
+<div>
+<div class="metricvalue" id="profileDeposits">
+           —
+          </div>
+<div class="metriclabel">
+           Deposits
+          </div>
+</div>
+</div>
+<button class="btn2" onclick="openModal('edit')" style="width:100%;margin-top:16px">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z">
+</path>
+</svg>
+         Edit profile
+        </button>
+</div>
+</aside>
+<div class="grid">
+<div class="card">
+<h3 class="ctitle">
+         Account information
+        </h3>
+<div class="setting">
+<div>
+<b>
+           Full name
+          </b>
+<div class="small muted" id="profileFullName">
+           Loading…
+          </div>
+</div>
+<button class="ghost" onclick="openModal('edit')">
+          Edit
+         </button>
+</div>
+<div class="setting">
+<div>
+<b>
+           Email
+          </b>
+<div class="small muted" id="profileEmailDetail">
+           Loading…
+          </div>
+</div>
+<span class="badge green">
+          Verified
+         </span>
+</div>
+<div class="setting">
+<div>
+<b>
+           Password
+          </b>
+<div class="small muted">
+           Password is securely hashed and never displayed.
+          </div>
+</div>
+</div>
+</div>
+<div class="card">
+<h3 class="ctitle">
+         App preferences
+        </h3>
+<div class="setting">
+<div>
+<b>
+           Token activity alerts
+          </b>
+<div class="small muted">
+           Show confirmations after rewards.
+          </div>
+</div>
+<button aria-label="Toggle token activity alerts" class="toggle" data-preference="tokenAlerts" type="button">
+</button>
+</div>
+<div class="setting">
+<div>
+<b>
+           Nearby bin suggestions
+          </b>
+<div class="small muted">
+           Order bins by proximity.
+          </div>
+</div>
+<button aria-label="Toggle nearby bin suggestions" class="toggle" data-preference="nearbyBins" type="button">
+</button>
+</div>
+<div class="setting">
+<div>
+<b>
+           Preparation reminders
+          </b>
+<div class="small muted">
+           Show bottle preparation guidance.
+          </div>
+</div>
+<button aria-label="Toggle preparation reminders" class="toggle" data-preference="preparationReminders" type="button">
+</button>
+</div>
+</div>
+<div class="card">
+<h3 class="ctitle">
+         Account access
+        </h3>
+<div class="rowbtn" style="margin-top:16px">
+<a class="btn2" href="../admin/bins.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Zm-3-10 2 2 4-4">
+</path>
+</svg>
+          Open admin
+         </a>
+<a class="btndanger" href="../auth/login.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="m10 17 5-5-5-5M15 12H3M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4">
+</path>
+</svg>
+          Log out
+         </a>
+</div>
+</div>
+</div>
+</section>
+<div class="modalbg" id="edit">
+<div class="modal">
+<div class="modalhead">
+<h3>
+         Edit profile
+        </h3>
+<button class="iconbtn" onclick="closeModal('edit')">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M18 6 6 18M6 6l12 12">
+</path>
+</svg>
+</button>
+</div>
+<div class="modalbody">
+<div class="field">
+<label>
+          Full name
+         </label>
+<input class="input" id="profileFullNameInput" maxlength="150" required=""/>
+</div>
+<div class="field" style="margin-top:14px">
+<label>
+          Email
+         </label>
+<input class="input" id="profileEmailInput" readonly=""/>
+</div>
+<p class="field-error hidden" id="profileFormError"></p>
+</div>
+<div class="modalfoot">
+<button class="btn2" onclick="closeModal('edit')">
+         Cancel
+        </button>
+<button class="btn" id="profileSaveButton" type="button">
+         Save
+        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<nav class="bottom">
+<a class="" href="../bins/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z">
+</path>
+<path d="M9 3v15M15 6v15">
+</path>
+</svg>
+<span>
+      Bins
+     </span>
+</a>
+<a class="" href="../rewards/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<rect height="4" rx="1" width="18" x="3" y="8">
+</rect>
+<path d="M12 8v13M19 12v9H5v-9M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5">
+</path>
+</svg>
+<span>
+      Rewards
+     </span>
+</a>
+<a class="" href="../deposit/session.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<rect height="5" rx="1" width="5" x="3" y="3">
+</rect>
+<rect height="5" rx="1" width="5" x="16" y="3">
+</rect>
+<rect height="5" rx="1" width="5" x="3" y="16">
+</rect>
+<path d="M21 16h-3a2 2 0 0 0-2 2v3M21 21h.01M12 7v3a2 2 0 0 1-2 2H7M12 16h.01M16 12h1M21 12h.01">
+</path>
+</svg>
+<span>
+      Scan
+     </span>
+</a>
+<a class="" href="../activity/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M3 12a9 9 0 1 0 3-6.7L3 8V3h5M12 7v5l4 2">
+</path>
+</svg>
+<span>
+      Activity
+     </span>
+</a>
+<a class="active" href="index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2">
+</path>
+<circle cx="12" cy="7" r="4">
+</circle>
+</svg>
+<span>
+      Profile
+     </span>
+</a>
+</nav>
+</div>
+<div class="toast" id="toast">
+</div>
+
+<script src="../../src/scripts/app.js" type="module"></script><script src="../../src/scripts/pages/profile-page.js" type="module"></script></body>
+</html>

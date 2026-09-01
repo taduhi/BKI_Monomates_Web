@@ -1,0 +1,71 @@
+# services:
+#   postgres:
+#     image: postgres:17-alpine
+#     container_name: monomates-postgres
+#     restart: unless-stopped
+#     environment:
+#       POSTGRES_DB: monomates
+#       POSTGRES_USER: monomates
+#       POSTGRES_PASSWORD: monomates_dev_password
+#     ports: ["5432:5432"]
+#     volumes: ["monomates_postgres_data:/var/lib/postgresql/data"]
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U monomates -d monomates"]
+#       interval: 5s
+#       timeout: 5s
+#       retries: 10
+# volumes:
+#   monomates_postgres_data:
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: monomates-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: monomates
+      POSTGRES_USER: monomates
+      POSTGRES_PASSWORD: monomates_dev_password
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - monomates_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U monomates -d monomates
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: monomates-api
+    restart: unless-stopped
+
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+
+      DATABASE_URL: jdbc:postgresql://postgres:5432/monomates
+      DATABASE_USERNAME: monomates
+      DATABASE_PASSWORD: monomates_dev_password
+
+      FRONTEND_ORIGIN: http://localhost:5173
+      COOKIE_SECURE: "false"
+      DEMO_DATA_ENABLED: "true"
+
+    ports:
+      - "8081:8080"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  monomates_postgres_data:

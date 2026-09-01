@@ -1,0 +1,108 @@
+.balance {
+    background: var(--primary);
+    color: #fff
+}
+
+.vouchers {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px
+}
+
+.voucher {
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column
+}
+
+.vtop {
+    min-height: 130px;
+    padding: 18px;
+    background: #eff6ff;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between
+}
+
+.vbody {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    flex: 1
+}
+
+.vbody .btn,
+.vbody .btn2 {
+    margin-top: auto
+}
+
+.vicon {
+    width: 58px;
+    height: 58px;
+    border-radius: 17px;
+    background: #fff;
+    display: grid;
+    place-items: center;
+    color: var(--primary)
+}
+
+@media(min-width:680px) {
+    .vouchers {
+        grid-template-columns: repeat(2, 1fr)
+    }
+}
+
+@media(min-width:1180px) {
+    .vouchers {
+        grid-template-columns: repeat(3, 1fr)
+    }
+}
+
+
+/* MonoMates brand */
+.brand {
+    gap: 9px;
+}
+
+.brand-logo {
+    width: 70px;
+    height: 46px;
+    object-fit: contain;
+    flex: 0 0 auto;
+}
+
+.brand-name {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.7px;
+}
+
+.brand-name .mono {
+    color: #064e3b;
+}
+
+.brand-name .mates {
+    color: #2e9f4d;
+}
+
+.sidebar .brand {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+@media (max-width: 360px) {
+    .brand-logo {
+        width: 58px;
+        height: 40px;
+    }
+
+    .brand-name {
+        font-size: 19px;
+    }
+}

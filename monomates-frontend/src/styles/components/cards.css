@@ -1,0 +1,32 @@
+.card {
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius-card);
+  padding: 20px; box-shadow: var(--shadow);
+}
+.hover { transition: 0.18s; }
+.hover:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12); border-color: #cbd5e1; }
+.badge, .chip {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 5px 10px;
+  border-radius: 999px; font-size: 12px; line-height: 1; font-weight: 850; white-space: nowrap;
+}
+.blue { background: #eff6ff; color: var(--primary-dark); }
+.green, .active { background: #f0fdf4; color: #15803d; }
+.orange, .pending { background: #fffbeb; color: #b45309; }
+.red, .error { background: #fef2f2; color: #b91c1c; }
+.gray, .inactive { background: #f1f5f9; color: #475569; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.progress { height: 9px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+.bar { height: 100%; background: var(--primary); border-radius: inherit; }
+.bar.ok { background: var(--success); }
+.bar.warn { background: var(--warning); }
+.bar.bad { background: var(--danger); }
+.metric { display: flex; align-items: center; gap: 12px; }
+.metricicon { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 13px; background: #eff6ff; color: var(--primary); }
+.metricvalue { font-size: 24px; font-weight: 900; line-height: 1.1; letter-spacing: -0.03em; }
+.metriclabel { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+.detail { display: grid; gap: 13px; }
+.drow { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+.drow span:first-child { color: var(--text-secondary); }
+.drow strong { text-align: right; }
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+.empty { text-align: center; padding: 44px 20px; }
+.emptyicon { width: 58px; height: 58px; margin: 0 auto 14px; display: grid; place-items: center; border-radius: 18px; background: #f1f5f9; color: var(--text-secondary); }

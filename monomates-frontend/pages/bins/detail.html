@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>
+   Bin details — MonoMates
+  </title>
+
+
+<link href="../../src/styles/main.css" rel="stylesheet"/><link href="../../src/styles/pages/bin-detail.css" rel="stylesheet"/><link href="../../public/manifest.webmanifest" rel="manifest"/></head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a aria-label="MonoMates home" class="brand" href="../../index.html">
+<img alt="MonoMates logo" class="brand-logo" src="../../src/assets/images/logo/monomates-logo.png"/>
+<span class="brand-name">
+<span class="mono">
+       Mono
+      </span>
+<span class="mates">
+       Mates
+      </span>
+</span>
+</a>
+<div class="navlabel">
+     Explore
+    </div>
+<nav class="nav">
+<a class="active" href="index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z">
+</path>
+<path d="M9 3v15M15 6v15">
+</path>
+</svg>
+<span>
+       Find bins
+      </span>
+</a>
+<a class="" href="../rewards/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<rect height="4" rx="1" width="18" x="3" y="8">
+</rect>
+<path d="M12 8v13M19 12v9H5v-9M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5">
+</path>
+</svg>
+<span>
+       Rewards
+      </span>
+</a>
+<a class="" href="../activity/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M3 12a9 9 0 1 0 3-6.7L3 8V3h5M12 7v5l4 2">
+</path>
+</svg>
+<span>
+       Activity
+      </span>
+</a>
+<a class="" href="../profile/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2">
+</path>
+<circle cx="12" cy="7" r="4">
+</circle>
+</svg>
+<span>
+       Profile
+      </span>
+</a>
+</nav>
+<div class="navlabel">
+     Prototype
+    </div>
+<nav class="nav">
+<a href="../admin/bins.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Zm-3-10 2 2 4-4">
+</path>
+</svg>
+<span>
+       Administration
+      </span>
+</a>
+</nav>
+<div class="user-mini">
+<div class="avatar">
+      LC
+     </div>
+<div>
+<b>
+       Loading…
+      </b>
+<div class="tiny muted">
+       Member
+      </div>
+</div>
+</div>
+</aside>
+<div class="main">
+<header class="topbar">
+<div>
+<h1>
+       Bin details
+      </h1>
+<div class="subtitle">
+       Review accepted items before starting a deposit
+      </div>
+</div>
+<div class="topactions">
+<a class="tokenpill" href="../activity/index.html">
+<svg aria-hidden="true" class="ico sm" viewbox="0 0 24 24">
+<circle cx="8" cy="8" r="6">
+</circle>
+<path d="M18.1 10.4A6 6 0 1 1 10.4 18.1M7 6h1v4M16.7 13.9l.7.7-2.8 2.8">
+</path>
+</svg>
+       — PT
+      </a>
+<button class="iconbtn" onclick="toast('No new notifications.')">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M10.3 21a1.94 1.94 0 0 0 3.4 0M4 17h16M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9">
+</path>
+</svg>
+</button>
+<a class="iconbtn" href="../profile/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2">
+</path>
+<circle cx="12" cy="7" r="4">
+</circle>
+</svg>
+</a>
+</div>
+</header>
+<main class="content">
+<div class="card empty hidden" id="detailError">
+<p class="muted" id="detailErrorMessage"></p>
+</div>
+<a class="ghost" href="index.html" style="padding-left:0">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="m12 19-7-7 7-7M19 12H5">
+</path>
+</svg>
+      Back to bins
+     </a>
+<section class="detailhero" id="detailHero" style="margin-top:12px">
+<div class="card binpic">
+<div class="binillus">
+<div class="bintop">
+</div>
+<div class="binbody">
+</div>
+<div class="binscreen">
+<svg aria-hidden="true" class="ico lg" viewbox="0 0 24 24">
+<rect height="5" rx="1" width="5" x="3" y="3">
+</rect>
+<rect height="5" rx="1" width="5" x="16" y="3">
+</rect>
+<rect height="5" rx="1" width="5" x="3" y="16">
+</rect>
+<path d="M21 16h-3a2 2 0 0 0-2 2v3M21 21h.01M12 7v3a2 2 0 0 1-2 2H7M12 16h.01M16 12h1M21 12h.01">
+</path>
+</svg>
+</div>
+</div>
+<span class="badge green" style="position:absolute;bottom:14px;right:14px">
+<svg aria-hidden="true" class="ico sm" viewbox="0 0 24 24">
+<path d="M14.5 4 16 7h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h3l1.5-3h5Z">
+</path>
+<circle cx="12" cy="13" r="3">
+</circle>
+</svg>
+        Simulation ready
+       </span>
+</div>
+<div class="card">
+<div style="display:flex;justify-content:space-between;gap:14px">
+<div>
+<div class="tiny muted">
+          BIN ID · <span id="binCode">—</span>
+         </div>
+<h2 id="binName" style="font-size:30px;letter-spacing:-.04em;margin:5px 0">
+          Loading…
+         </h2>
+</div>
+<span class="chip" id="binStatusChip">
+<span class="dot">
+</span>
+<span id="binStatusLabel">
+         —
+        </span>
+</span>
+</div>
+<p class="muted" id="binAddress">
+        Loading location…
+</p>
+<div class="small muted" id="binDistance">Distance unavailable</div>
+<div class="small muted" id="binUpdatedAt">Update time unavailable</div>
+<div class="card" style="box-shadow:none;background:#f8fafc">
+<div style="display:flex;justify-content:space-between">
+<b>
+          Capacity
+         </b>
+<b id="binCapacityText">
+          —
+         </b>
+</div>
+<div class="progress" style="margin-top:8px">
+<div class="bar" id="binCapacityBar" style="width:0%">
+</div>
+</div>
+</div>
+<div id="acceptedItemsCard"></div>
+<div class="rowbtn" style="margin-top:16px">
+<a class="btn2" id="directionsLink" target="_blank" rel="noopener">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<polygon points="3 11 22 2 13 21 11 13 3 11">
+</polygon>
+</svg>
+         Directions
+         </a>
+<a class="btn" href="../deposit/session.html" id="scanQrLink">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<rect height="5" rx="1" width="5" x="3" y="3">
+</rect>
+<rect height="5" rx="1" width="5" x="16" y="3">
+</rect>
+<rect height="5" rx="1" width="5" x="3" y="16">
+</rect>
+<path d="M21 16h-3a2 2 0 0 0-2 2v3M21 21h.01M12 7v3a2 2 0 0 1-2 2H7M12 16h.01M16 12h1M21 12h.01">
+</path>
+</svg>
+         Scan QR
+        </a>
+</div>
+</div>
+</section>
+<div class="sectionhead">
+<div>
+<h3>
+        How to earn tokens here
+       </h3>
+<p>
+        QR starts a session but never awards tokens by itself.
+       </p>
+</div>
+</div>
+<section class="grid g2">
+<div class="card">
+<div class="detail">
+<div>
+<b>
+          1. Scan the QR code
+         </b>
+<div class="small muted">
+          A 60-second deposit session opens.
+         </div>
+</div>
+<div>
+<b>
+          2. Insert one item
+         </b>
+<div class="small muted">
+          The bin must detect a physical event.
+         </div>
+</div>
+<div>
+<b>
+          3. Wait for validation
+         </b>
+<div class="small muted">
+          The prototype simulates validation of the deposited item.
+         </div>
+</div>
+<div>
+<b>
+          4. Receive the result
+         </b>
+<div class="small muted">
+          Earn 0, 1, or 2 PT.
+         </div>
+</div>
+</div>
+</div>
+<div class="card">
+<h3 class="ctitle">
+        Before inserting
+       </h3>
+<div class="detail" style="margin-top:16px">
+<div>
+<svg aria-hidden="true" class="ico sm" viewbox="0 0 24 24">
+<path d="m20 6-11 11-5-5">
+</path>
+</svg>
+         Empty all liquid.
+        </div>
+<div>
+<svg aria-hidden="true" class="ico sm" viewbox="0 0 24 24">
+<path d="m20 6-11 11-5-5">
+</path>
+</svg>
+         Remove visible residue.
+        </div>
+<div>
+<svg aria-hidden="true" class="ico sm" viewbox="0 0 24 24">
+<path d="m20 6-11 11-5-5">
+</path>
+</svg>
+         Insert one bottle at a time.
+        </div>
+<div>
+<svg aria-hidden="true" class="ico sm" viewbox="0 0 24 24">
+<path d="m20 6-11 11-5-5">
+</path>
+</svg>
+         Keep it visible to the camera.
+        </div>
+</div>
+<div class="divider">
+</div>
+<div class="small muted">
+        Demo limit: one rewarded deposit per user per bin per Ho Chi Minh City local day.
+       </div>
+</div>
+</section>
+<div class="sectionhead">
+<div>
+<h3>
+        Accepted and rejected examples
+       </h3>
+<p>
+        Only empty clear plastic items receive the extra demo token.
+       </p>
+</div>
+</div>
+<section class="items">
+<div class="item good">
+<span>
+<svg aria-hidden="true" class="ico lg" viewbox="0 0 24 24">
+<path d="M9 2h6M10 2v4L8 9v11a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V9l-2-3V2M8 13h8">
+</path>
+</svg>
+</span>
+<b>
+        Clear bottle
+       </b>
+</div>
+<div class="item bad">
+<span>
+<svg aria-hidden="true" class="ico lg" viewbox="0 0 24 24">
+<path d="M18 6 6 18M6 6l12 12">
+</path>
+</svg>
+</span>
+<b>
+        Plastic bag
+       </b>
+</div>
+<div class="item bad">
+<span>
+<svg aria-hidden="true" class="ico lg" viewbox="0 0 24 24">
+<path d="M18 6 6 18M6 6l12 12">
+</path>
+</svg>
+</span>
+<b>
+        Opaque container
+       </b>
+</div>
+<div class="item bad">
+<span>
+<svg aria-hidden="true" class="ico lg" viewbox="0 0 24 24">
+<path d="M18 6 6 18M6 6l12 12">
+</path>
+</svg>
+</span>
+<b>
+        Glass or metal
+       </b>
+</div>
+</section>
+<section class="card" style="margin-top:28px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+<div>
+<b>
+        Something wrong with this bin?
+       </b>
+<div class="small muted">
+        Report fullness, damage, QR issues, or a wrong location.
+       </div>
+</div>
+<button class="btn2" onclick="openModal('report')">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M10.3 2.6 1.8 17a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 2.6a2 2 0 0 0-3.4 0ZM12 9v4M12 17h.01">
+</path>
+</svg>
+       Report problem
+      </button>
+</section>
+<div class="modalbg" id="report">
+<div class="modal">
+<div class="modalhead">
+<h3>
+         Report a problem
+        </h3>
+<button class="iconbtn" onclick="closeModal('report')">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M18 6 6 18M6 6l12 12">
+</path>
+</svg>
+</button>
+</div>
+<div class="modalbody">
+<div class="field">
+<label>
+          Problem type
+         </label>
+<select class="select">
+<option>
+           Bin is full
+          </option>
+<option>
+           Bin is broken
+          </option>
+<option>
+           QR damaged
+          </option>
+<option>
+           Wrong location
+          </option>
+</select>
+</div>
+<div class="field" style="margin-top:14px">
+<label>
+          Description
+         </label>
+<textarea class="textarea" placeholder="Add a short description"></textarea>
+</div>
+</div>
+<div class="modalfoot">
+<button class="btn2" onclick="closeModal('report')">
+         Cancel
+        </button>
+<button class="btn" onclick="closeModal('report');toast('Problem reporting is planned for a later prototype.')">
+         Continue later
+        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<nav class="bottom">
+<a class="active" href="index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z">
+</path>
+<path d="M9 3v15M15 6v15">
+</path>
+</svg>
+<span>
+      Bins
+     </span>
+</a>
+<a class="" href="../rewards/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<rect height="4" rx="1" width="18" x="3" y="8">
+</rect>
+<path d="M12 8v13M19 12v9H5v-9M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5">
+</path>
+</svg>
+<span>
+      Rewards
+     </span>
+</a>
+<a class="" href="../deposit/session.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<rect height="5" rx="1" width="5" x="3" y="3">
+</rect>
+<rect height="5" rx="1" width="5" x="16" y="3">
+</rect>
+<rect height="5" rx="1" width="5" x="3" y="16">
+</rect>
+<path d="M21 16h-3a2 2 0 0 0-2 2v3M21 21h.01M12 7v3a2 2 0 0 1-2 2H7M12 16h.01M16 12h1M21 12h.01">
+</path>
+</svg>
+<span>
+      Scan
+     </span>
+</a>
+<a class="" href="../activity/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M3 12a9 9 0 1 0 3-6.7L3 8V3h5M12 7v5l4 2">
+</path>
+</svg>
+<span>
+      Activity
+     </span>
+</a>
+<a class="" href="../profile/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2">
+</path>
+<circle cx="12" cy="7" r="4">
+</circle>
+</svg>
+<span>
+      Profile
+     </span>
+</a>
+</nav>
+</div>
+<div class="toast" id="toast">
+</div>
+
+<script src="../../src/scripts/app.js" type="module"></script><script src="../../src/scripts/pages/bin-detail-page.js" type="module"></script></body>
+</html>

@@ -1,0 +1,136 @@
+.hero2 {
+    display: grid;
+    gap: 18px;
+    align-items: center
+}
+
+.maplayout {
+    display: grid;
+    gap: 16px
+}
+
+.fakemap {
+    min-height: 470px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    background-color: #eef2f7;
+    background-image: linear-gradient(30deg, transparent 46%, #fff 47%, #fff 52%, transparent 53%), linear-gradient(110deg, transparent 46%, #fff 47%, #fff 52%, transparent 53%), linear-gradient(#cbd5e1 1px, transparent 1px), linear-gradient(90deg, #cbd5e1 1px, transparent 1px);
+    background-size: 120px 120px, 170px 170px, 42px 42px, 42px 42px
+}
+
+.pinbtn {
+    position: absolute;
+    border: 0;
+    background: transparent;
+    transform: translate(-50%, -100%);
+    cursor: pointer
+}
+
+.pinshape {
+    width: 42px;
+    height: 42px;
+    border-radius: 50% 50% 50% 8px;
+    transform: rotate(-45deg);
+    background: var(--primary);
+    color: #fff;
+    border: 3px solid #fff;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 8px 15px rgba(15, 23, 42, .2)
+}
+
+.pinshape svg {
+    transform: rotate(45deg)
+}
+
+.binlist {
+    display: grid;
+    gap: 12px
+}
+
+.bincard {
+    cursor: pointer
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    color: var(--text-secondary);
+    font-size: 13px
+}
+
+.meta span {
+    display: flex;
+    gap: 6px;
+    align-items: center
+}
+
+@media(min-width:680px) {
+    .hero2 {
+        grid-template-columns: 1fr 240px
+    }
+}
+
+@media(min-width:1080px) {
+    .maplayout {
+        grid-template-columns: 1.2fr .8fr
+    }
+
+    .binlist {
+        max-height: 570px;
+        overflow: auto
+    }
+
+    .fakemap {
+        min-height: 570px
+    }
+}
+
+
+/* MonoMates brand */
+.brand {
+    gap: 9px;
+}
+
+.brand-logo {
+    width: 70px;
+    height: 46px;
+    object-fit: contain;
+    flex: 0 0 auto;
+}
+
+.brand-name {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.7px;
+}
+
+.brand-name .mono {
+    color: #064e3b;
+}
+
+.brand-name .mates {
+    color: #2e9f4d;
+}
+
+.sidebar .brand {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+@media (max-width: 360px) {
+    .brand-logo {
+        width: 58px;
+        height: 40px;
+    }
+
+    .brand-name {
+        font-size: 19px;
+    }
+}

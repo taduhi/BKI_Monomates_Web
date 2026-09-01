@@ -1,0 +1,15 @@
+# Local secrets (defense in depth; each app also has its own rules)
+**/.env
+**/.env.*
+!**/.env.example
+
+# Internal AI-agent development process docs — kept on disk for local project
+# history, not needed by anyone cloning this repo to run it or continue
+# development/hardware integration. project_docs/BKI_Monomates_web.md (the
+# actual product/technical spec) stays tracked.
+project_docs/Tong_quan_du_an.md
+project_docs/codex_worklog.md
+project_docs/claude_worklog.md
+project_docs/implementation_plan.md
+project_docs/repository_audit.md
+

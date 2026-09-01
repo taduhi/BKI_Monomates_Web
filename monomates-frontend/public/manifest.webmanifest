@@ -1,0 +1,9 @@
+{
+  "name": "MonoMates",
+  "short_name": "MonoMates",
+  "description": "Smart recycling and verified rewards prototype",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb"
+}

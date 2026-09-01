@@ -1,0 +1,10 @@
+spring:
+  jpa:
+    show-sql: false
+logging:
+  level:
+    com.monomates.api: INFO
+
+app:
+  demo-data:
+    enabled: ${DEMO_DATA_ENABLED:true}

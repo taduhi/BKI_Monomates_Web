@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>
+   Rewards — MonoMates
+  </title>
+
+
+<link href="../../src/styles/main.css" rel="stylesheet"/><link href="../../src/styles/pages/rewards.css" rel="stylesheet"/><link href="../../public/manifest.webmanifest" rel="manifest"/></head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a aria-label="MonoMates home" class="brand" href="../../index.html">
+<img alt="MonoMates logo" class="brand-logo" src="../../src/assets/images/logo/monomates-logo.png"/>
+<span class="brand-name">
+<span class="mono">
+       Mono
+      </span>
+<span class="mates">
+       Mates
+      </span>
+</span>
+</a>
+<div class="navlabel">
+     Explore
+    </div>
+<nav class="nav">
+<a class="" href="../bins/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z">
+</path>
+<path d="M9 3v15M15 6v15">
+</path>
+</svg>
+<span>
+       Find bins
+      </span>
+</a>
+<a class="active" href="index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<rect height="4" rx="1" width="18" x="3" y="8">
+</rect>
+<path d="M12 8v13M19 12v9H5v-9M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5">
+</path>
+</svg>
+<span>
+       Rewards
+      </span>
+</a>
+<a class="" href="../activity/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M3 12a9 9 0 1 0 3-6.7L3 8V3h5M12 7v5l4 2">
+</path>
+</svg>
+<span>
+       Activity
+      </span>
+</a>
+<a class="" href="../profile/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2">
+</path>
+<circle cx="12" cy="7" r="4">
+</circle>
+</svg>
+<span>
+       Profile
+      </span>
+</a>
+</nav>
+<div class="navlabel">
+     Prototype
+    </div>
+<nav class="nav">
+<a href="../admin/bins.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Zm-3-10 2 2 4-4">
+</path>
+</svg>
+<span>
+       Administration
+      </span>
+</a>
+</nav>
+<div class="user-mini">
+<div class="avatar">
+      LC
+     </div>
+<div>
+<b>
+       Loading…
+      </b>
+<div class="tiny muted">
+       Member
+      </div>
+</div>
+</div>
+</aside>
+<div class="main">
+<header class="topbar">
+<div>
+<h1>
+       Rewards
+      </h1>
+<div class="subtitle">
+       Redeem demo vouchers with Plastique Tokens
+      </div>
+</div>
+<div class="topactions">
+<a class="tokenpill" href="../activity/index.html">
+<svg aria-hidden="true" class="ico sm" viewbox="0 0 24 24">
+<circle cx="8" cy="8" r="6">
+</circle>
+<path d="M18.1 10.4A6 6 0 1 1 10.4 18.1M7 6h1v4M16.7 13.9l.7.7-2.8 2.8">
+</path>
+</svg>
+       — PT
+      </a>
+<button class="iconbtn" onclick="toast('No new notifications.')">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M10.3 21a1.94 1.94 0 0 0 3.4 0M4 17h16M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9">
+</path>
+</svg>
+</button>
+<a class="iconbtn" href="../profile/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2">
+</path>
+<circle cx="12" cy="7" r="4">
+</circle>
+</svg>
+</a>
+</div>
+</header>
+<main class="content">
+<section class="card balance">
+<span class="badge" style="background:rgba(255,255,255,.16);color:#fff">
+       Plastique Tokens
+      </span>
+<h2 id="rewardsBalanceHeading" style="font-size:36px;letter-spacing:-.04em;margin:12px 0 4px">
+       — PT available
+      </h2>
+<p style="color:#dbeafe">
+       Redeem your Plastique Tokens for demo rewards.
+      </p>
+</section>
+<div class="sectionhead">
+<div>
+<h3>
+        Rewards
+       </h3>
+<p>
+        Demo voucher codes are not valid for real payment.
+       </p>
+</div>
+</div>
+<section class="filters">
+<div class="inputwrap">
+<svg aria-hidden="true" class="ico searchicon" viewbox="0 0 24 24">
+<circle cx="11" cy="11" r="8">
+</circle>
+<path d="m21 21-4.3-4.3">
+</path>
+</svg>
+<input class="input hasicon" id="rq" oninput="fr()" placeholder="Search rewards"/>
+</div>
+<select class="select" id="ra" onchange="fr()">
+<option value="all">
+        All rewards
+       </option>
+<option value="afford">
+        I can redeem
+       </option>
+<option value="locked">
+        Need more tokens
+       </option>
+</select>
+<select class="select">
+<option>
+        All categories
+       </option>
+<option>
+        Food &amp; drink
+       </option>
+<option>
+        Transport
+       </option>
+</select>
+</section>
+<section class="vouchers" id="vg" style="margin-top:16px"></section>
+<div class="sectionhead">
+<div>
+<h3>My redeemed vouchers</h3>
+<p>Keep your issued demo codes available after closing the confirmation.</p>
+</div>
+</div>
+<section class="grid" id="myRedemptions"></section>
+<div class="modalbg" id="redeem">
+<div class="modal">
+<div class="modalhead">
+<div>
+<span class="badge blue">
+          Confirm redemption
+         </span>
+<h3 id="rname" style="margin-top:10px">
+          Coffee voucher
+         </h3>
+</div>
+<button class="iconbtn" onclick="closeModal('redeem')">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M18 6 6 18M6 6l12 12">
+</path>
+</svg>
+</button>
+</div>
+<div class="modalbody">
+<div id="confirm">
+<div class="detail">
+<div class="drow">
+<span>
+            Current balance
+           </span>
+<strong id="rcurrentBalance">
+            — PT
+           </strong>
+</div>
+<div class="drow">
+<span>
+            Voucher cost
+           </span>
+<strong id="rcost">
+            20 PT
+           </strong>
+</div>
+<div class="drow">
+<span>
+            Remaining balance
+           </span>
+<strong id="rremain">
+            5 PT
+           </strong>
+</div>
+<div class="drow">
+<span>Expiry</span>
+<strong id="rExpiry">—</strong>
+</div>
+<div class="drow">
+<span>Redemption condition</span>
+<strong id="rCondition">—</strong>
+</div>
+</div>
+<div class="card" style="box-shadow:none;background:#f8fafc;margin-top:16px">
+          Demo voucher, not valid for real payment.
+         </div>
+</div>
+<div class="hidden" id="done" style="text-align:center">
+<div style="width:80px;height:80px;border-radius:50%;background:#f0fdf4;color:#15803d;display:grid;place-items:center;margin:auto">
+<svg aria-hidden="true" class="ico xl" viewbox="0 0 24 24">
+<path d="m20 6-11 11-5-5">
+</path>
+</svg>
+</div>
+<h3>
+          Reward redeemed
+         </h3>
+<div class="card green" id="rcode" style="box-shadow:none;font-family:monospace;font-weight:900">
+          PLASTIQUE-CODE
+         </div>
+<p class="small muted" id="rDoneInstructions"></p>
+</div>
+</div>
+<div class="modalfoot" id="rf">
+<button class="btn2" onclick="closeModal('redeem')">
+         Cancel
+        </button>
+<button class="btn" onclick="confirm.style.display='none';done.classList.remove('hidden');rf.innerHTML='&lt;button class=&quot;btn&quot; onclick=&quot;closeModal('redeem')&quot;&gt;Done&lt;/button&gt;'">
+         Confirm
+        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<nav class="bottom">
+<a class="" href="../bins/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z">
+</path>
+<path d="M9 3v15M15 6v15">
+</path>
+</svg>
+<span>
+      Bins
+     </span>
+</a>
+<a class="active" href="index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<rect height="4" rx="1" width="18" x="3" y="8">
+</rect>
+<path d="M12 8v13M19 12v9H5v-9M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5">
+</path>
+</svg>
+<span>
+      Rewards
+     </span>
+</a>
+<a class="" href="../deposit/session.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<rect height="5" rx="1" width="5" x="3" y="3">
+</rect>
+<rect height="5" rx="1" width="5" x="16" y="3">
+</rect>
+<rect height="5" rx="1" width="5" x="3" y="16">
+</rect>
+<path d="M21 16h-3a2 2 0 0 0-2 2v3M21 21h.01M12 7v3a2 2 0 0 1-2 2H7M12 16h.01M16 12h1M21 12h.01">
+</path>
+</svg>
+<span>
+      Scan
+     </span>
+</a>
+<a class="" href="../activity/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M3 12a9 9 0 1 0 3-6.7L3 8V3h5M12 7v5l4 2">
+</path>
+</svg>
+<span>
+      Activity
+     </span>
+</a>
+<a class="" href="../profile/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2">
+</path>
+<circle cx="12" cy="7" r="4">
+</circle>
+</svg>
+<span>
+      Profile
+     </span>
+</a>
+</nav>
+</div>
+<div class="toast" id="toast">
+</div>
+
+
+<script src="../../src/scripts/app.js" type="module"></script><script src="../../src/scripts/pages/rewards-page.js" type="module"></script></body>
+</html>

@@ -1,0 +1,5 @@
+public_code	name	location_name	address	latitude	longitude	status	capacity_percent	accepted_item_codes	device_code	device_secret	device_status	firmware_version
+BIN-HCMUT-001	HCMUT Smart Bin A	HCMUT Campus	268 Ly Thuong Kiet, District 10, Ho Chi Minh City	10.772100	106.657900	ACTIVE	24	CLEAR_PET_BOTTLE	DEV-HCMUT-001	demo-device-secret-hcmut	ACTIVE	demo-1.1
+BIN-YOUTH-001	Youth Cultural House Bin	Youth Cultural House	4 Pham Ngoc Thach, District 1, Ho Chi Minh City	10.783600	106.695300	ACTIVE	58	CLEAR_PET_BOTTLE	DEV-YOUTH-001	demo-device-secret-youth	ACTIVE	demo-1.1
+BIN-D10-001	District 10 Community Bin	District 10 Community Pilot Site	District 10, Ho Chi Minh City	10.774200	106.667700	MAINTENANCE	42	CLEAR_PET_BOTTLE	DEV-D10-001	demo-device-secret-d10	MAINTENANCE	demo-1.0
+BIN-LIBRARY-001	City Library Smart Bin	Ho Chi Minh City General Sciences Library	69 Ly Tu Trong, District 1, Ho Chi Minh City	10.775600	106.699600	FULL	96	CLEAR_PET_BOTTLE	DEV-LIBRARY-001	demo-device-secret-library	ACTIVE	demo-1.1

@@ -1,0 +1,61 @@
+@baseUrl = http://localhost:8080/api/v1
+@contentType = application/json
+
+### API status
+GET {{baseUrl}}/status
+
+### Login as demo user
+# The response sets the mm_access_token HttpOnly cookie.
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "user@monomates.local",
+  "password": "User123!"
+}
+
+### Current user
+GET {{baseUrl}}/auth/me
+
+### List recycling bins
+GET {{baseUrl}}/bins
+
+### Read the demo bin
+GET {{baseUrl}}/bins/BIN-HCMUT-001
+
+### Start a 60-second deposit session
+POST {{baseUrl}}/bins/BIN-HCMUT-001/sessions
+
+### Simulate an accepted clear PET bottle
+# Replace the placeholder with the sessionId returned above.
+POST {{baseUrl}}/testing/simulate-deposit
+Content-Type: {{contentType}}
+
+{
+  "sessionId": "00000000-0000-0000-0000-000000000000",
+  "outcome": "ACCEPTED_PET"
+}
+
+### Token balance
+GET {{baseUrl}}/users/me/token-balance
+
+### Token ledger
+GET {{baseUrl}}/users/me/token-ledger
+
+### Available vouchers
+GET {{baseUrl}}/vouchers
+
+### Login as administrator
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@monomates.local",
+  "password": "Admin123!"
+}
+
+### Admin analytics
+GET {{baseUrl}}/admin/analytics/summary
+
+### Synthetic local dataset summary (login first)
+GET {{baseUrl}}/testing/dataset-summary

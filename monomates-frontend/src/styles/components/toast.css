@@ -1,0 +1,5 @@
+.toast { position: fixed; z-index: 140; left: 16px; right: 16px; bottom: 92px; max-width: 460px; margin: auto; padding: 14px 16px; color: #fff; background: #0f172a; border-radius: 14px; box-shadow: 0 18px 40px rgba(15,23,42,0.24); transform: translateY(24px); opacity: 0; pointer-events: none; transition: 0.24s; }
+.toast.show { opacity: 1; transform: none; }
+.toast.success { background: #166534; }
+.toast.error { background: #991b1b; }
+@media (min-width: 680px) { .toast { left: auto; right: 24px; bottom: 24px; } }

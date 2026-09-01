@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>
+   Admin · Transactions — MonoMates
+  </title>
+
+
+<link href="../../src/styles/main.css" rel="stylesheet"/><link href="../../src/styles/pages/admin.css" rel="stylesheet"/><link href="../../public/manifest.webmanifest" rel="manifest"/></head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a aria-label="MonoMates home" class="brand" href="../../index.html">
+<img alt="MonoMates logo" class="brand-logo" src="../../src/assets/images/logo/monomates-logo.png"/>
+<span class="brand-name">
+<span class="mono">
+       Mono
+      </span>
+<span class="mates">
+       Mates
+      </span>
+</span>
+</a>
+<div class="navlabel">
+     Administration
+    </div>
+<nav class="nav">
+<a class="" href="bins.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<rect height="20" rx="2" width="16" x="4" y="2">
+</rect>
+<path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01">
+</path>
+</svg>
+<span>
+       Bins
+      </span>
+</a>
+<a class="" href="vouchers.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M2 9a3 3 0 0 0 0 6v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a3 3 0 0 0 0-6V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2ZM13 5v2M13 17v2M13 11v2">
+</path>
+</svg>
+<span>
+       Vouchers
+      </span>
+</a>
+<a class="active" href="transactions.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="m17 3 4 4-4 4M3 7h18m-14 14-4-4 4-4M21 17H3">
+</path>
+</svg>
+<span>
+       Transactions
+      </span>
+</a>
+</nav>
+<div class="navlabel">
+     Prototype
+    </div>
+<nav class="nav">
+<a href="../bins/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z">
+</path>
+<path d="M9 3v15M15 6v15">
+</path>
+</svg>
+<span>
+       User prototype
+      </span>
+</a>
+</nav>
+<div class="user-mini">
+<div class="avatar">
+      LC
+     </div>
+<div>
+<b>
+       Loading…
+      </b>
+<div class="tiny muted">
+       Administrator
+      </div>
+</div>
+</div>
+</aside>
+<div class="main">
+<header class="topbar">
+<div>
+<h1>
+       Admin · Transactions
+      </h1>
+<div class="subtitle">
+       Review token activity and reward decisions
+      </div>
+</div>
+<div class="topactions">
+<button class="iconbtn" onclick="toast('No new notifications.')">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M10.3 21a1.94 1.94 0 0 0 3.4 0M4 17h16M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9">
+</path>
+</svg>
+</button>
+<a class="iconbtn" href="bins.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2">
+</path>
+<circle cx="12" cy="7" r="4">
+</circle>
+</svg>
+</a>
+</div>
+</header>
+<main class="content">
+<div class="heading">
+<span class="badge blue">
+       Administration
+      </span>
+<h2 style="margin-top:10px">
+       Token transactions
+      </h2>
+<p>
+       Review confirmed ledger entries, grouped deposit outcomes, voucher spending, and no-reward cases.
+      </p>
+</div>
+<section class="stats">
+<div class="card">
+<div class="metric">
+<span class="metricicon" style="background:#f0fdf4;color:#15803d">
+<svg aria-hidden="true" class="ico lg" viewbox="0 0 24 24">
+<circle cx="8" cy="8" r="6">
+</circle>
+<path d="M18.1 10.4A6 6 0 1 1 10.4 18.1M7 6h1v4M16.7 13.9l.7.7-2.8 2.8">
+</path>
+</svg>
+</span>
+<div>
+<div class="metricvalue" id="txIssuedValue">
+          —
+         </div>
+<div class="metriclabel">
+          Issued this month
+         </div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="metric">
+<span class="metricicon" style="">
+<svg aria-hidden="true" class="ico lg" viewbox="0 0 24 24">
+<rect height="4" rx="1" width="18" x="3" y="8">
+</rect>
+<path d="M12 8v13M19 12v9H5v-9M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5">
+</path>
+</svg>
+</span>
+<div>
+<div class="metricvalue" id="txRedeemedValue">
+          —
+         </div>
+<div class="metriclabel">
+          Redeemed this month
+         </div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="metric">
+<span class="metricicon" style="background:#fffbeb;color:#b45309">
+<svg aria-hidden="true" class="ico lg" viewbox="0 0 24 24">
+<path d="M10.3 2.6 1.8 17a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 2.6a2 2 0 0 0-3.4 0ZM12 9v4M12 17h.01">
+</path>
+</svg>
+</span>
+<div>
+<div class="metricvalue" id="txTotalValue">
+          —
+         </div>
+<div class="metriclabel">
+          Total entries
+         </div>
+</div>
+</div>
+</div>
+</section>
+<div class="sectionhead">
+<div>
+<h3>
+        Ledger
+       </h3>
+<p>
+        Confirmed token transactions are the balance source of truth.
+       </p>
+</div>
+<button class="btn2" onclick="toast('CSV export is a visual placeholder.')">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4m4-5 5 5 5-5M12 15V3">
+</path>
+</svg>
+       Export
+      </button>
+</div>
+<section class="filters">
+<div class="inputwrap">
+<svg aria-hidden="true" class="ico searchicon" viewbox="0 0 24 24">
+<circle cx="11" cy="11" r="8">
+</circle>
+<path d="m21 21-4.3-4.3">
+</path>
+</svg>
+<input class="input hasicon" id="txSearch" oninput="txFilter()" placeholder="Search user, bin, or voucher"/>
+</div>
+<select class="select" id="txType" onchange="txFilter()">
+<option value="all">
+        All types
+       </option>
+<option value="DEPOSIT_BASE">
+        Deposit base
+       </option>
+<option value="PET_BONUS">
+        PET bonus
+       </option>
+<option value="REDEMPTION">
+        Redemption
+       </option>
+<option value="ADJUSTMENT">
+        Adjustment
+       </option>
+</select>
+</section>
+<section class="tablebox" style="margin-top:16px">
+<div class="scroll">
+<table>
+<thead>
+<tr>
+<th>
+           Transaction
+          </th>
+<th>
+           User
+          </th>
+<th>
+           Source
+          </th>
+<th>
+           Type
+          </th>
+<th>
+           Amount
+          </th>
+<th>
+           Date
+          </th>
+<th>
+</th>
+</tr>
+</thead>
+<tbody id="txTableBody">
+</tbody>
+</table>
+</div>
+<div class="tablefoot">
+<span id="txCountLabel">
+        Loading…
+       </span>
+<div class="rowbtn">
+<button class="btn2" id="txPrevPage" type="button">
+         Previous
+        </button>
+<span class="small muted" id="txPageLabel">
+</span>
+<button class="btn2" id="txNextPage" type="button">
+         Next
+        </button>
+</div>
+</div>
+</section>
+<div class="modalbg" id="tm">
+<div class="modal">
+<div class="modalhead">
+<div>
+<span class="badge blue">
+          Transaction detail
+         </span>
+<h3 id="txDetailTitle" style="margin-top:10px">
+</h3>
+</div>
+<button class="iconbtn" onclick="closeModal('tm')">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M18 6 6 18M6 6l12 12">
+</path>
+</svg>
+</button>
+</div>
+<div class="modalbody">
+<div class="detail" id="txDetailBody">
+</div>
+</div>
+<div class="modalfoot">
+<button class="btn2" onclick="closeModal('tm')">
+         Close
+        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<nav class="bottom">
+<a class="" href="bins.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<rect height="20" rx="2" width="16" x="4" y="2">
+</rect>
+<path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01">
+</path>
+</svg>
+<span>
+      Bins
+     </span>
+</a>
+<a class="" href="vouchers.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M2 9a3 3 0 0 0 0 6v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a3 3 0 0 0 0-6V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2ZM13 5v2M13 17v2M13 11v2">
+</path>
+</svg>
+<span>
+      Vouchers
+     </span>
+</a>
+<a class="active" href="transactions.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="m17 3 4 4-4 4M3 7h18m-14 14-4-4 4-4M21 17H3">
+</path>
+</svg>
+<span>
+      Activity
+     </span>
+</a>
+<a class="" href="../bins/index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z">
+</path>
+<path d="M9 3v15M15 6v15">
+</path>
+</svg>
+<span>
+      User
+     </span>
+</a>
+<a class="" href="../../index.html">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
+<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 18 2 18 2c1 5-1 12-7 14">
+</path>
+<path d="M2 21c0-3 1.9-5.4 5.1-6.9C9.7 12.8 12 10 13 7">
+</path>
+</svg>
+<span>
+      Home
+     </span>
+</a>
+</nav>
+</div>
+<div class="toast" id="toast">
+</div>
+
+<script src="../../src/scripts/app.js" type="module"></script><script src="../../src/scripts/pages/admin-transactions-page.js" type="module"></script></body>
+</html>

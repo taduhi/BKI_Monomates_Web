@@ -1,0 +1,2 @@
+.sidebar { display: none; position: fixed; inset: 0 auto 0 0; width: var(--sidebar); background: #fff; border-right: 1px solid var(--border); padding: 18px 15px; z-index: 50; flex-direction: column; }
+@media (min-width: 1024px) { .sidebar { display: flex; } }

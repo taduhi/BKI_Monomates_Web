@@ -1,0 +1,19 @@
+body { font: 15px/1.5 Inter, Arial, sans-serif; }
+.ico {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: 0 0 auto;
+}
+.sm { width: 16px; height: 16px; }
+.lg { width: 26px; height: 26px; }
+.xl { width: 40px; height: 40px; }
+.muted { color: var(--text-secondary); }
+.small { font-size: 13px; }
+.tiny { font-size: 12px; }
+.ctitle { margin: 0; font-size: 18px; line-height: 1.25; letter-spacing: -0.015em; }
+.csub { margin: 5px 0 0; color: var(--text-secondary); font-size: 13px; }
