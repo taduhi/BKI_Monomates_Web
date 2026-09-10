@@ -175,7 +175,8 @@ class DepositSessionFlowTest {
   }
 
   @Test
-  void cancellingFreesTheBinForTheNextUserButNotForTheSameUserTheSameDay() throws Exception {
+  void cancellingFreesTheBinImmediatelyForAnyoneIncludingTheSameUserTheSameDay()
+    throws Exception {
     Cookie first = registerUser();
     Cookie second = registerUser();
 
@@ -189,10 +190,29 @@ class DepositSessionFlowTest {
     assertThat(field(nextUser, "status")).isEqualTo("ACTIVE");
     cancelSession(second, field(nextUser, "sessionId"));
 
-    // The original user already used this bin today: a retry is still
-    // refused even though the bin itself is free again.
+    // There is no longer a once-a-day-per-bin limit: the original user may
+    // reuse the same bin again the same day, counted only against their
+    // overall daily scan total (see the dedicated daily-limit test).
     MvcResult retry = startSession(first, ACTIVE_BIN);
-    assertThat(retry.getResponse().getStatus()).isEqualTo(409);
+    assertThat(retry.getResponse().getStatus()).isEqualTo(200);
+    cancelSession(first, field(retry, "sessionId"));
+  }
+
+  @Test
+  void aRegularAccountIsBlockedAfterTenScansTheSameDay() throws Exception {
+    Cookie user = registerUser();
+
+    for (int i = 0; i < 10; i++) {
+      MvcResult started = startSession(user, i % 2 == 0 ? ACTIVE_BIN : SECOND_ACTIVE_BIN);
+      assertThat(started.getResponse().getStatus())
+        .as("scan #%d of 10 should be allowed", i + 1)
+        .isEqualTo(200);
+      cancelSession(user, field(started, "sessionId"));
+    }
+
+    MvcResult eleventh = startSession(user, ACTIVE_BIN);
+    assertThat(eleventh.getResponse().getStatus()).isEqualTo(409);
+    assertThat(field(eleventh, "message")).contains("10 scans for today");
   }
 
   @Test

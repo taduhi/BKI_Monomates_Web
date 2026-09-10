@@ -39,6 +39,7 @@ app:
     session-seconds: 60
     minimum-weight-grams: 5.0
     minimum-classification-confidence: 0.70
+    daily-scan-limit: 10
   demo:
     secret-account-email: ${DEMO_SECRET_ACCOUNT_EMAIL:demo@monomates.app}
   rate-limit:

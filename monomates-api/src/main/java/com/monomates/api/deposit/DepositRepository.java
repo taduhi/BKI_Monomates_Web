@@ -35,6 +35,4 @@ public interface DepositRepository extends JpaRepository<Deposit, UUID> {
     }
   )
   List<Deposit> findBySession_User_IdOrderByCreatedAtDesc(UUID userId);
-
-  void deleteBySession_Id(UUID sessionId);
 }

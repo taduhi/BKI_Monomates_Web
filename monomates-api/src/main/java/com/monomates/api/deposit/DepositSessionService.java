@@ -5,7 +5,6 @@ import com.monomates.api.common.exception.*;
 import com.monomates.api.demo.DemoProperties;
 import com.monomates.api.deposit.dto.*;
 import com.monomates.api.reward.RewardService;
-import com.monomates.api.reward.TokenLedgerRepository;
 import com.monomates.api.user.UserAccount;
 import java.time.*;
 import java.util.UUID;
@@ -21,7 +20,6 @@ public class DepositSessionService {
   private final DepositProperties p;
   private final RewardService rewards;
   private final DemoProperties demoProps;
-  private final TokenLedgerRepository ledger;
 
   public DepositSessionService(
     DepositSessionRepository s,
@@ -29,8 +27,7 @@ public class DepositSessionService {
     BinService b,
     DepositProperties p,
     RewardService r,
-    DemoProperties demoProps,
-    TokenLedgerRepository ledger
+    DemoProperties demoProps
   ) {
     sessions = s;
     deposits = d;
@@ -38,7 +35,6 @@ public class DepositSessionService {
     this.p = p;
     rewards = r;
     this.demoProps = demoProps;
-    this.ledger = ledger;
   }
 
   private static final ZoneId LOCAL_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
@@ -69,34 +65,24 @@ public class DepositSessionService {
     boolean isDemoAccount =
       demoProps.secretAccountEmail() != null &&
       demoProps.secretAccountEmail().equalsIgnoreCase(u.getEmail());
-    if (isDemoAccount) {
-      // The fixed demo account is reused for repeated live demonstrations
-      // of the QR->session->secret-sort flow, so instead of being blocked
-      // by the once-a-day limit below it resets its own record for this
-      // bin/day: any previous session (and its deposit/ledger rows, if the
-      // earlier run completed) is discarded before starting a fresh one.
-      // The DB-level unique constraint on (user, bin, session_date) still
-      // applies, so this reset — not just skipping the check — is what
-      // makes a second start possible. Every other account is unaffected.
-      sessions
-        .findByUser_IdAndBin_IdAndSessionDate(u.getId(), b.getId(), today)
-        .ifPresent(old -> {
-          deposits
-            .findBySession_Id(old.getId())
-            .ifPresent(d -> ledger.deleteByDeposit_Id(d.getId()));
-          deposits.deleteBySession_Id(old.getId());
-          sessions.delete(old);
-          sessions.flush();
-        });
-    } else if (
-      sessions.existsByUser_IdAndBin_IdAndSessionDate(
+    // The fixed demo account has no daily limit at all, for unlimited live
+    // demonstrations. Every other account may start at most
+    // app.deposit.daily-scan-limit sessions per day, counted across every
+    // bin (not per bin) — tokens from earlier scans the same day are kept,
+    // never discarded. "Today" is the current date in Asia/Ho_Chi_Minh,
+    // recomputed from the real clock on every request, so this limit lifts
+    // on its own at local midnight with no scheduled job.
+    if (!isDemoAccount) {
+      long usedToday = sessions.countByUser_IdAndSessionDate(
         u.getId(),
-        b.getId(),
         today
-      )
-    ) throw new ConflictException(
-      "You already started a session for this bin today."
-    );
+      );
+      if (usedToday >= p.dailyScanLimit()) throw new ConflictException(
+        "You have used all " +
+        p.dailyScanLimit() +
+        " scans for today. Try again tomorrow."
+      );
+    }
     return SessionResponse.from(
       sessions.save(
         new DepositSession(

@@ -7,5 +7,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record DepositProperties(
   long sessionSeconds,
   BigDecimal minimumWeightGrams,
-  BigDecimal minimumClassificationConfidence
+  BigDecimal minimumClassificationConfidence,
+  int dailyScanLimit
 ) {}

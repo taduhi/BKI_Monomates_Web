@@ -9,13 +9,12 @@ import org.springframework.data.repository.query.Param;
 public interface DepositSessionRepository
   extends JpaRepository<DepositSession, UUID>
 {
-  boolean existsByUser_IdAndBin_IdAndSessionDate(
-    UUID userId,
-    UUID binId,
-    LocalDate date
-  );
+  long countByUser_IdAndSessionDate(UUID userId, LocalDate date);
 
-  Optional<DepositSession> findByUser_IdAndBin_IdAndSessionDate(
+  // Used only by DemoDataInitializer to avoid re-inserting the same
+  // synthetic historical row on every local-profile app restart — unrelated
+  // to the (removed) once-a-day-per-bin business rule.
+  boolean existsByUser_IdAndBin_IdAndSessionDate(
     UUID userId,
     UUID binId,
     LocalDate date

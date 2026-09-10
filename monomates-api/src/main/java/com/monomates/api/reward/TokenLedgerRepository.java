@@ -17,8 +17,6 @@ public interface TokenLedgerRepository
   )
   long tokensForDeposit(@Param("depositId") UUID depositId);
 
-  void deleteByDeposit_Id(UUID depositId);
-
   boolean existsByUser_IdAndTransactionTypeAndDescription(
     UUID userId,
     TokenTransactionType transactionType,

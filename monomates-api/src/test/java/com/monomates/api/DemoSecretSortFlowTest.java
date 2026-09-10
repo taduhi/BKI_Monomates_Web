@@ -219,7 +219,7 @@ class DemoSecretSortFlowTest {
   }
 
   @Test
-  void theFixedDemoAccountCanRestartTheSameBinOnTheSameDayResettingItsOwnHistory()
+  void theFixedDemoAccountCanRescanTheSameBinRepeatedlyAndTokensAccumulate()
     throws Exception {
     Cookie demo = registerUser(DEMO_EMAIL);
     MvcResult first = startSession(demo);
@@ -237,18 +237,53 @@ class DemoSecretSortFlowTest {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.tokensAwarded").value(2));
 
-    // A normal account would be rejected with 409 here (one session per
-    // bin/day); the fixed demo account instead resets its own record for
-    // this bin/day and is allowed to start again.
+    // A regular account is capped at 10 scans per day (see
+    // aRegularAccountIsBlockedAfterTenScansTheSameDay); the fixed demo
+    // account has no such limit and may reuse the same bin again the same
+    // day without waiting.
     MvcResult second = startSession(demo);
     assertThat(second.getResponse().getStatus()).isEqualTo(200);
-    assertThat(field(second, "sessionId")).isNotEqualTo(firstSessionId);
+    String secondSessionId = field(second, "sessionId");
+    assertThat(secondSessionId).isNotEqualTo(firstSessionId);
 
-    // The first run's reward is gone, not just superseded — the demo
-    // account's balance reflects only the fresh run going forward.
+    mvc
+      .perform(
+        post("/api/v1/demo/secret-sort")
+          .with(csrf())
+          .cookie(demo)
+          .contentType(MediaType.APPLICATION_JSON)
+          .content("{\"sessionId\":\"%s\",\"outcome\":\"ACCEPTED_PET\"}".formatted(secondSessionId))
+      )
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.tokensAwarded").value(2));
+
+    // Tokens from the first run are kept, not discarded — the balance is
+    // the sum of both runs (2 + 2), never reset by a later scan.
     mvc
       .perform(get("/api/v1/users/me/token-balance").cookie(demo))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.balance").value(0));
+      .andExpect(jsonPath("$.balance").value(4));
+  }
+
+  @Test
+  void theFixedDemoAccountHasNoDailyScanLimit() throws Exception {
+    Cookie demo = registerUser(DEMO_EMAIL);
+
+    // A regular account would be blocked on the 11th scan of the day (see
+    // aRegularAccountIsBlockedAfterTenScansTheSameDay); the demo account
+    // must still succeed well past that point.
+    for (int i = 0; i < 12; i++) {
+      MvcResult started = startSession(demo);
+      assertThat(started.getResponse().getStatus())
+        .as("demo scan #%d should never be blocked by the daily limit", i + 1)
+        .isEqualTo(200);
+      mvc
+        .perform(
+          post("/api/v1/sessions/{id}/cancel", field(started, "sessionId"))
+            .with(csrf())
+            .cookie(demo)
+        )
+        .andExpect(status().isOk());
+    }
   }
 }
