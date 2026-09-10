@@ -2,8 +2,10 @@ package com.monomates.api.deposit;
 
 import com.monomates.api.bin.*;
 import com.monomates.api.common.exception.*;
+import com.monomates.api.demo.DemoProperties;
 import com.monomates.api.deposit.dto.*;
 import com.monomates.api.reward.RewardService;
+import com.monomates.api.reward.TokenLedgerRepository;
 import com.monomates.api.user.UserAccount;
 import java.time.*;
 import java.util.UUID;
@@ -18,19 +20,25 @@ public class DepositSessionService {
   private final BinService bins;
   private final DepositProperties p;
   private final RewardService rewards;
+  private final DemoProperties demoProps;
+  private final TokenLedgerRepository ledger;
 
   public DepositSessionService(
     DepositSessionRepository s,
     DepositRepository d,
     BinService b,
     DepositProperties p,
-    RewardService r
+    RewardService r,
+    DemoProperties demoProps,
+    TokenLedgerRepository ledger
   ) {
     sessions = s;
     deposits = d;
     bins = b;
     this.p = p;
     rewards = r;
+    this.demoProps = demoProps;
+    this.ledger = ledger;
   }
 
   private static final ZoneId LOCAL_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
@@ -58,7 +66,29 @@ public class DepositSessionService {
         }
       });
     LocalDate today = LocalDate.now(LOCAL_ZONE);
-    if (
+    boolean isDemoAccount =
+      demoProps.secretAccountEmail() != null &&
+      demoProps.secretAccountEmail().equalsIgnoreCase(u.getEmail());
+    if (isDemoAccount) {
+      // The fixed demo account is reused for repeated live demonstrations
+      // of the QR->session->secret-sort flow, so instead of being blocked
+      // by the once-a-day limit below it resets its own record for this
+      // bin/day: any previous session (and its deposit/ledger rows, if the
+      // earlier run completed) is discarded before starting a fresh one.
+      // The DB-level unique constraint on (user, bin, session_date) still
+      // applies, so this reset — not just skipping the check — is what
+      // makes a second start possible. Every other account is unaffected.
+      sessions
+        .findByUser_IdAndBin_IdAndSessionDate(u.getId(), b.getId(), today)
+        .ifPresent(old -> {
+          deposits
+            .findBySession_Id(old.getId())
+            .ifPresent(d -> ledger.deleteByDeposit_Id(d.getId()));
+          deposits.deleteBySession_Id(old.getId());
+          sessions.delete(old);
+          sessions.flush();
+        });
+    } else if (
       sessions.existsByUser_IdAndBin_IdAndSessionDate(
         u.getId(),
         b.getId(),

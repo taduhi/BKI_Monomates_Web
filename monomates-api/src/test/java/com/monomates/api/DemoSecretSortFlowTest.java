@@ -217,4 +217,38 @@ class DemoSecretSortFlowTest {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.balance").value(0));
   }
+
+  @Test
+  void theFixedDemoAccountCanRestartTheSameBinOnTheSameDayResettingItsOwnHistory()
+    throws Exception {
+    Cookie demo = registerUser(DEMO_EMAIL);
+    MvcResult first = startSession(demo);
+    assertThat(first.getResponse().getStatus()).isEqualTo(200);
+    String firstSessionId = field(first, "sessionId");
+
+    mvc
+      .perform(
+        post("/api/v1/demo/secret-sort")
+          .with(csrf())
+          .cookie(demo)
+          .contentType(MediaType.APPLICATION_JSON)
+          .content("{\"sessionId\":\"%s\",\"outcome\":\"ACCEPTED_PET\"}".formatted(firstSessionId))
+      )
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.tokensAwarded").value(2));
+
+    // A normal account would be rejected with 409 here (one session per
+    // bin/day); the fixed demo account instead resets its own record for
+    // this bin/day and is allowed to start again.
+    MvcResult second = startSession(demo);
+    assertThat(second.getResponse().getStatus()).isEqualTo(200);
+    assertThat(field(second, "sessionId")).isNotEqualTo(firstSessionId);
+
+    // The first run's reward is gone, not just superseded — the demo
+    // account's balance reflects only the fresh run going forward.
+    mvc
+      .perform(get("/api/v1/users/me/token-balance").cookie(demo))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.balance").value(0));
+  }
 }

@@ -15,6 +15,12 @@ public interface DepositSessionRepository
     LocalDate date
   );
 
+  Optional<DepositSession> findByUser_IdAndBin_IdAndSessionDate(
+    UUID userId,
+    UUID binId,
+    LocalDate date
+  );
+
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   Optional<DepositSession> findByBin_IdAndStatus(
     UUID binId,
