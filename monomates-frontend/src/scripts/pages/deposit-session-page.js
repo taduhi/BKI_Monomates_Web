@@ -1,12 +1,61 @@
 import { requireAuthentication } from "../guards/auth-guard.js";
 import { startDepositSession } from "../api/bins-api.js";
-import { getDepositSession, cancelDepositSession } from "../api/deposit-api.js";
+import { getDepositSession, cancelDepositSession, secretSort } from "../api/deposit-api.js";
 import { ApiError } from "../api/api-client.js";
 import { queryParam, escapeHtml } from "../utils/dom.js";
 import { renderTokenBalancePill } from "../components/token-balance.js";
 
-await requireAuthentication();
+const currentUser = await requireAuthentication();
 renderTokenBalancePill();
+
+// Mirrors the backend's app.demo.secret-account-email default. Purely
+// cosmetic here: the real gate is the server-side check in
+// DemoSecretSortController, so this constant being stale only hides or
+// shows the three decorative dots below, nothing security-relevant.
+const SECRET_ACCOUNT_EMAIL = "demo@monomates.app";
+
+// Looks like a small decorative "sensor status" indicator strip (a plausible
+// design accent on a smart-bin product page) rather than an obvious set of
+// controls. Still only ever added to the DOM for the fixed demo account —
+// this styling change only makes it noticeable enough for that account
+// holder to use live during a demo, it does not change who can see it.
+function injectSecretSortControls() {
+  if (currentUser?.email?.toLowerCase() !== SECRET_ACCOUNT_EMAIL) return;
+
+  const card = document.querySelector(".card.session");
+  if (!card || document.getElementById("secretSortDots")) return;
+  card.style.position = "relative";
+
+  const wrap = document.createElement("div");
+  wrap.id = "secretSortDots";
+  wrap.style.cssText = "position:absolute;bottom:12px;right:16px;display:flex;gap:7px;";
+
+  const dot = (color, label, onClick) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.title = label;
+    b.setAttribute("aria-label", label);
+    b.style.cssText = `width:11px;height:11px;padding:0;border:1px solid rgba(0,0,0,.08);border-radius:50%;background:${color};cursor:pointer;box-shadow:0 0 0 2px #fff inset;`;
+    b.addEventListener("click", onClick);
+    return b;
+  };
+
+  const sort = async (outcome) => {
+    if (!currentSession || currentSession.status !== "ACTIVE") return;
+    try {
+      await secretSort(currentSession.sessionId, outcome);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  wrap.append(
+    dot("#22c55e", "Đạt yêu cầu", () => sort("ACCEPTED_PET")),
+    dot("#ef4444", "Không đạt yêu cầu", () => sort("VALID_UNCERTAIN")),
+    dot("#eab308", "Chưa có vật phẩm", () => sort("REJECTED"))
+  );
+  card.appendChild(wrap);
+}
 
 const POLL_INTERVAL_MS = 1500;
 
@@ -219,3 +268,4 @@ async function init() {
 }
 
 init();
+injectSecretSortControls();

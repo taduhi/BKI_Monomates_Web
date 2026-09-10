@@ -1,5 +1,6 @@
 package com.monomates.api.security;
 
+import com.monomates.api.demo.DemoProperties;
 import com.monomates.api.deposit.DepositProperties;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -16,6 +17,7 @@ import org.springframework.security.oauth2.jwt.*;
   AuthProperties.class,
   DepositProperties.class,
   RateLimitProperties.class,
+  DemoProperties.class,
 })
 public class JwtConfiguration {
 

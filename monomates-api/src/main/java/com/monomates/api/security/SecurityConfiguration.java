@@ -41,10 +41,20 @@ public class SecurityConfiguration {
     HttpSecurity h,
     CookieBearerTokenResolver r,
     ObjectMapper m,
-    CorsConfigurationSource corsConfigurationSource
+    CorsConfigurationSource corsConfigurationSource,
+    AuthProperties authProperties
   ) throws Exception {
     CookieCsrfTokenRepository csrfRepository =
       CookieCsrfTokenRepository.withHttpOnlyFalse();
+    // Must match the auth cookie's Secure/SameSite policy (see
+    // AuthController), otherwise the browser drops the XSRF-TOKEN cookie on
+    // the very cross-site requests that need SameSite=None to work at all,
+    // and unsafe requests then fail CSRF validation with no cookie present.
+    csrfRepository.setCookieCustomizer(cookie ->
+      cookie
+        .secure(authProperties.cookieSecure())
+        .sameSite(authProperties.cookieSameSite())
+    );
     CsrfTokenRequestAttributeHandler csrfHandler =
       new CsrfTokenRequestAttributeHandler();
 

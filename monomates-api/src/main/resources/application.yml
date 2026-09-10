@@ -34,11 +34,13 @@ app:
     access-token-minutes: 120
     cookie-name: mm_access_token
     cookie-secure: ${COOKIE_SECURE:false}
-    cookie-same-site: Lax
+    cookie-same-site: ${COOKIE_SAME_SITE:Lax}
   deposit:
     session-seconds: 60
     minimum-weight-grams: 5.0
     minimum-classification-confidence: 0.70
+  demo:
+    secret-account-email: ${DEMO_SECRET_ACCOUNT_EMAIL:demo@monomates.app}
   rate-limit:
     auth-requests-per-minute: ${AUTH_RATE_LIMIT_PER_MINUTE:30}
     api-requests-per-minute: ${API_RATE_LIMIT_PER_MINUTE:300}
