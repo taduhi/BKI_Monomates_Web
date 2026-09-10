@@ -5,23 +5,18 @@ import { ApiError } from "../api/api-client.js";
 import { queryParam, escapeHtml } from "../utils/dom.js";
 import { renderTokenBalancePill } from "../components/token-balance.js";
 
-const currentUser = await requireAuthentication();
+await requireAuthentication();
 renderTokenBalancePill();
 
-// Mirrors the backend's app.demo.secret-account-email default. Purely
-// cosmetic here: the real gate is the server-side check in
-// DemoSecretSortController, so this constant being stale only hides or
-// shows the three decorative dots below, nothing security-relevant.
-const SECRET_ACCOUNT_EMAIL = "demo@monomates.app";
-
-// Looks like a small decorative "sensor status" indicator strip (a plausible
-// design accent on a smart-bin product page) rather than an obvious set of
-// controls. Still only ever added to the DOM for the fixed demo account —
-// this styling change only makes it noticeable enough for that account
-// holder to use live during a demo, it does not change who can see it.
+// Always rendered for every logged-in account, identically — there is no
+// client-side identity check left here on purpose. Real authorization lives
+// entirely server-side in DemoSecretSortController (only the account whose
+// email matches app.demo.secret-account-email gets a real effect; any other
+// account gets a 404 and the click is silently a no-op). Looking like a
+// small decorative "sensor status" indicator strip on every account, with
+// no code path that reveals which account is special, is stronger secrecy
+// than hiding the markup only for one account.
 function injectSecretSortControls() {
-  if (currentUser?.email?.toLowerCase() !== SECRET_ACCOUNT_EMAIL) return;
-
   const card = document.querySelector(".card.session");
   if (!card || document.getElementById("secretSortDots")) return;
   card.style.position = "relative";
@@ -40,8 +35,13 @@ function injectSecretSortControls() {
     return b;
   };
 
+  // No client-side status gate: whichever session is currently loaded is
+  // sent as-is, and the backend alone decides whether it is still valid.
+  // This is deliberate — the button must keep working for the one account
+  // that is allowed to use it regardless of session/scan state, and it must
+  // stay a harmless no-op (a 404 swallowed here) for every other account.
   const sort = async (outcome) => {
-    if (!currentSession || currentSession.status !== "ACTIVE") return;
+    if (!currentSession?.sessionId) return;
     try {
       await secretSort(currentSession.sessionId, outcome);
     } catch (error) {
