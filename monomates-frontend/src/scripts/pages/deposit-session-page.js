@@ -114,15 +114,15 @@ const SECRET_SORT_RESULTS = {
   },
   VALID_UNCERTAIN: {
     label: "Not accepted",
-    badgeClass: "blue",
-    visualClass: "",
+    badgeClass: "red",
+    visualClass: "fail",
     icon: ICONS.fail,
     toastType: "error"
   },
   REJECTED: {
     label: "Invalid",
-    badgeClass: "blue",
-    visualClass: "",
+    badgeClass: "orange",
+    visualClass: "partial",
     icon: ICONS.fail,
     toastType: "error"
   }

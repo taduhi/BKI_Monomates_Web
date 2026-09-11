@@ -20,7 +20,9 @@ function depositTitle(status) {
 }
 
 function depositIconStyle(status) {
-  return status === "ACCEPTED" ? "" : "background:#eff6ff;color:var(--primary)";
+  if (status === "ACCEPTED") return "";
+  if (status === "VALID_UNCLASSIFIED") return "background:#fef2f2;color:#b91c1c";
+  return "background:#fffbeb;color:#b45309";
 }
 
 function buildDepositActivity(deposit, ledgerEntries) {
