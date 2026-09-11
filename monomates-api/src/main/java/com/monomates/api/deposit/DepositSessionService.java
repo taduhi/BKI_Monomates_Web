@@ -6,6 +6,7 @@ import com.monomates.api.demo.DemoProperties;
 import com.monomates.api.deposit.dto.*;
 import com.monomates.api.reward.RewardService;
 import com.monomates.api.user.UserAccount;
+import com.monomates.api.user.UserRole;
 import java.time.*;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -65,14 +66,18 @@ public class DepositSessionService {
     boolean isDemoAccount =
       demoProps.secretAccountEmail() != null &&
       demoProps.secretAccountEmail().equalsIgnoreCase(u.getEmail());
-    // The fixed demo account has no daily limit at all, for unlimited live
-    // demonstrations. Every other account may start at most
-    // app.deposit.daily-scan-limit sessions per day, counted across every
-    // bin (not per bin) — tokens from earlier scans the same day are kept,
-    // never discarded. "Today" is the current date in Asia/Ho_Chi_Minh,
-    // recomputed from the real clock on every request, so this limit lifts
-    // on its own at local midnight with no scheduled job.
-    if (!isDemoAccount) {
+    boolean isExemptFromDailyLimit =
+      isDemoAccount || u.getRole() == UserRole.ADMIN;
+    // The fixed demo account and any admin account have no daily limit at
+    // all — demo for unlimited live demonstrations, admin so staff can test
+    // the full deposit flow without burning through the same 10-scan
+    // allowance a regular citizen gets. Every other account may start at
+    // most app.deposit.daily-scan-limit sessions per day, counted across
+    // every bin (not per bin) — tokens from earlier scans the same day are
+    // kept, never discarded. "Today" is the current date in
+    // Asia/Ho_Chi_Minh, recomputed from the real clock on every request, so
+    // this limit lifts on its own at local midnight with no scheduled job.
+    if (!isExemptFromDailyLimit) {
       long usedToday = sessions.countByUser_IdAndSessionDate(
         u.getId(),
         today

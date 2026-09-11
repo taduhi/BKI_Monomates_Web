@@ -216,6 +216,24 @@ class DepositSessionFlowTest {
   }
 
   @Test
+  void anAdminAccountHasNoDailyScanLimit() throws Exception {
+    Cookie admin = registerUser();
+    jdbc.update("update app_users set role = 'ADMIN' where email = ?", registeredEmails.peek());
+
+    // A regular account would be blocked on the 11th scan of the day (see
+    // aRegularAccountIsBlockedAfterTenScansTheSameDay); an admin account
+    // must still succeed well past that point, same as the fixed demo
+    // account.
+    for (int i = 0; i < 12; i++) {
+      MvcResult started = startSession(admin, i % 2 == 0 ? ACTIVE_BIN : SECOND_ACTIVE_BIN);
+      assertThat(started.getResponse().getStatus())
+        .as("admin scan #%d should never be blocked by the daily limit", i + 1)
+        .isEqualTo(200);
+      cancelSession(admin, field(started, "sessionId"));
+    }
+  }
+
+  @Test
   void exactlyOneOfTwoConcurrentSessionStartsOnTheSameBinSucceeds() throws Exception {
     Cookie userA = registerUser();
     Cookie userB = registerUser();
