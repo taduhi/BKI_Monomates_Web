@@ -147,7 +147,7 @@ class DemoSecretSortFlowTest {
   }
 
   @Test
-  void theFixedDemoAccountAcceptedPetOutcomeAwardsTwoTokens() throws Exception {
+  void theFixedDemoAccountAcceptedPetOutcomeAwardsOneToken() throws Exception {
     Cookie demo = registerUser(DEMO_EMAIL);
     MvcResult started = startSession(demo);
     assertThat(started.getResponse().getStatus()).isEqualTo(200);
@@ -162,16 +162,16 @@ class DemoSecretSortFlowTest {
           .content("{\"sessionId\":\"%s\",\"outcome\":\"ACCEPTED_PET\"}".formatted(sessionId))
       )
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.tokensAwarded").value(2));
+      .andExpect(jsonPath("$.tokensAwarded").value(1));
 
     mvc
       .perform(get("/api/v1/users/me/token-balance").cookie(demo))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.balance").value(2));
+      .andExpect(jsonPath("$.balance").value(1));
   }
 
   @Test
-  void theFixedDemoAccountValidUncertainOutcomeAwardsOneToken() throws Exception {
+  void theFixedDemoAccountValidUncertainOutcomeAwardsNoToken() throws Exception {
     Cookie demo = registerUser(DEMO_EMAIL);
     MvcResult started = startSession(demo);
     assertThat(started.getResponse().getStatus()).isEqualTo(200);
@@ -186,12 +186,12 @@ class DemoSecretSortFlowTest {
           .content("{\"sessionId\":\"%s\",\"outcome\":\"VALID_UNCERTAIN\"}".formatted(sessionId))
       )
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.tokensAwarded").value(1));
+      .andExpect(jsonPath("$.tokensAwarded").value(0));
 
     mvc
       .perform(get("/api/v1/users/me/token-balance").cookie(demo))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.balance").value(1));
+      .andExpect(jsonPath("$.balance").value(0));
   }
 
   @Test
@@ -235,7 +235,7 @@ class DemoSecretSortFlowTest {
           .content("{\"sessionId\":\"%s\",\"outcome\":\"ACCEPTED_PET\"}".formatted(firstSessionId))
       )
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.tokensAwarded").value(2));
+      .andExpect(jsonPath("$.tokensAwarded").value(1));
 
     // A regular account is capped at 10 scans per day (see
     // aRegularAccountIsBlockedAfterTenScansTheSameDay); the fixed demo
@@ -255,14 +255,14 @@ class DemoSecretSortFlowTest {
           .content("{\"sessionId\":\"%s\",\"outcome\":\"ACCEPTED_PET\"}".formatted(secondSessionId))
       )
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.tokensAwarded").value(2));
+      .andExpect(jsonPath("$.tokensAwarded").value(1));
 
     // Tokens from the first run are kept, not discarded — the balance is
-    // the sum of both runs (2 + 2), never reset by a later scan.
+    // the sum of both runs (1 + 1), never reset by a later scan.
     mvc
       .perform(get("/api/v1/users/me/token-balance").cookie(demo))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.balance").value(4));
+      .andExpect(jsonPath("$.balance").value(2));
   }
 
   @Test

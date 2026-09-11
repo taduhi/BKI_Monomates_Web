@@ -137,7 +137,7 @@ class EndToEndFlowTest {
       .andReturn();
     assertThat(intField(balanceAfterScan, "balance")).isEqualTo(0);
 
-    // 4. Simulate a hardware deposit event (accepted clear PET -> +2 PT).
+    // 4. Simulate a hardware deposit event (accepted clear PET -> +1 PT).
     MvcResult simulate = mvc
       .perform(
         post("/api/v1/testing/simulate-deposit")
@@ -149,34 +149,37 @@ class EndToEndFlowTest {
       .andExpect(status().isOk())
       .andReturn();
     assertThat(field(simulate, "status")).isEqualTo("ACCEPTED");
-    assertThat(intField(simulate, "tokensAwarded")).isEqualTo(2);
+    assertThat(intField(simulate, "tokensAwarded")).isEqualTo(1);
 
     // 5. Session must now read back as COMPLETED, decided by the backend.
     mvc
       .perform(get("/api/v1/sessions/{id}", sessionId).cookie(auth))
       .andExpect(status().isOk())
       .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.status").value("COMPLETED"))
-      .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.tokensAwarded").value(2));
+      .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.tokensAwarded").value(1));
 
     // 6. Reward reflected in balance and grouped ledger/activity.
     MvcResult balanceAfterReward = mvc
       .perform(get("/api/v1/users/me/token-balance").cookie(auth))
       .andExpect(status().isOk())
       .andReturn();
-    assertThat(intField(balanceAfterReward, "balance")).isEqualTo(2);
+    assertThat(intField(balanceAfterReward, "balance")).isEqualTo(1);
 
     MvcResult deposits = mvc
       .perform(get("/api/v1/users/me/deposits").cookie(auth))
       .andExpect(status().isOk())
       .andReturn();
-    assertThat(deposits.getResponse().getContentAsString()).contains("\"tokensAwarded\":2");
+    assertThat(deposits.getResponse().getContentAsString()).contains("\"tokensAwarded\":1");
 
     MvcResult ledger = mvc
       .perform(get("/api/v1/users/me/token-ledger").cookie(auth))
       .andExpect(status().isOk())
       .andReturn();
+    // Only PET_BONUS: base tokens for a valid-but-unaccepted deposit are 0,
+    // so an accepted clear PET bottle now earns its 1 PT purely from the
+    // bonus, and DEPOSIT_BASE is never recorded.
     assertThat(ledger.getResponse().getContentAsString())
-      .contains(email, "DEPOSIT_BASE", "PET_BONUS");
+      .contains(email, "PET_BONUS");
 
     // 7. Admin creates a voucher this user can just afford.
     MvcResult adminLogin = mvc
@@ -196,7 +199,7 @@ class EndToEndFlowTest {
           .cookie(adminAuth)
           .contentType(MediaType.APPLICATION_JSON)
           .content(
-            "{\"partnerName\":\"E2E Partner\",\"title\":\"E2E Voucher\",\"description\":\"e2e\",\"tokenCost\":2,\"inventory\":1,\"status\":\"ACTIVE\"}"
+            "{\"partnerName\":\"E2E Partner\",\"title\":\"E2E Voucher\",\"description\":\"e2e\",\"tokenCost\":1,\"inventory\":1,\"status\":\"ACTIVE\"}"
           )
       )
       .andExpect(status().isOk())

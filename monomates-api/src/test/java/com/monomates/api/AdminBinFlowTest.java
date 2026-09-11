@@ -227,7 +227,7 @@ class AdminBinFlowTest {
           .content("{\"sessionId\":\"%s\",\"outcome\":\"ACCEPTED_PET\"}".formatted(sessionId))
       )
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.tokensAwarded").value(2));
+      .andExpect(jsonPath("$.tokensAwarded").value(1));
 
     UUID deviceEventId = jdbc.queryForObject(
       "select device_event_id from deposits where session_id = ?",

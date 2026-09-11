@@ -39,7 +39,7 @@ function renderAcceptedItems(items) {
         <div class="card green" style="box-shadow:none;margin-top:14px">
           <span class="badge green">Accepted for extra token</span>
           <h3 class="ctitle" style="margin-top:10px">${escapeHtml(item.name)}</h3>
-          <p class="small muted">${escapeHtml(item.description ?? "")} A valid deposit earns ${item.baseTokens} PT. An accepted item earns ${item.bonusTokens} extra PT.</p>
+          <p class="small muted">${escapeHtml(item.description ?? "")} Only an accepted item earns a reward: +${item.bonusTokens} PT.</p>
         </div>
       `
     )

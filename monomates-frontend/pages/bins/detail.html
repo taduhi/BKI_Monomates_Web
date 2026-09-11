@@ -87,7 +87,7 @@
 </a>
 </nav>
 <div class="navlabel">
-     Prototype
+     Manage
     </div>
 <nav class="nav">
 <a href="../admin/bins.html">
@@ -188,14 +188,14 @@
 <circle cx="12" cy="13" r="3">
 </circle>
 </svg>
-        Simulation ready
+        Ready
        </span>
 </div>
 <div class="card">
 <div style="display:flex;justify-content:space-between;gap:14px">
 <div>
 <div class="tiny muted">
-          BIN ID · <span id="binCode">—</span>
+          BIN CODE · <span id="binCode">—</span>
          </div>
 <h2 id="binName" style="font-size:30px;letter-spacing:-.04em;margin:5px 0">
           Loading…
@@ -253,8 +253,8 @@
 </div>
 </div>
 <div class="card" id="qrCard" style="margin-top:16px;text-align:center">
-<b class="small">Physical QR code for this bin</b>
-<div class="small muted" style="margin-top:2px">Scan with any phone camera — no app needed. Print this to stick on the real bin.</div>
+<b class="small">Bin QR code</b>
+<div class="small muted" style="margin-top:2px">Scan this code to start a deposit at this bin.</div>
 <canvas id="binQrCanvas" style="margin-top:12px"></canvas>
 </div>
 </section>
@@ -264,7 +264,7 @@
         How to earn tokens here
        </h3>
 <p>
-        QR starts a session but never awards tokens by itself.
+        Scan the QR code, then insert an item before the timer ends.
        </p>
 </div>
 </div>
@@ -284,7 +284,7 @@
           2. Insert one item
          </b>
 <div class="small muted">
-          The bin must detect a physical event.
+          Insert your item before the session timer ends.
          </div>
 </div>
 <div>
@@ -292,7 +292,7 @@
           3. Wait for validation
          </b>
 <div class="small muted">
-          The prototype simulates validation of the deposited item.
+          The bin checks whether the item can be accepted.
          </div>
 </div>
 <div>
@@ -300,7 +300,7 @@
           4. Receive the result
          </b>
 <div class="small muted">
-          Earn 0, 1, or 2 PT.
+          Earn 1 PT only for an accepted clear bottle.
          </div>
 </div>
 </div>
@@ -336,13 +336,13 @@
 <path d="m20 6-11 11-5-5">
 </path>
 </svg>
-         Keep it visible to the camera.
+         Place the bottle fully inside the opening.
         </div>
 </div>
 <div class="divider">
 </div>
 <div class="small muted">
-        Demo limit: one rewarded deposit per user per bin per Ho Chi Minh City local day.
+        You can start up to 10 deposit sessions per day.
        </div>
 </div>
 </section>
@@ -352,7 +352,7 @@
         Accepted and rejected examples
        </h3>
 <p>
-        Only empty clear plastic items receive the extra demo token.
+        Only empty clear plastic bottles receive the bonus token.
        </p>
 </div>
 </div>
@@ -402,48 +402,6 @@
        </b>
 </div>
 </section>
-<section class="card" style="margin-top:28px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
-<div>
-<b>
-        Something wrong with this bin?
-       </b>
-<div class="small muted">
-        Report fullness, damage, QR issues, or a wrong location.
-       </div>
-</div>
-<button class="btn2" onclick="openModal('report')" type="button">
-<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
-<path d="M10.3 2.6 1.8 17a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 2.6a2 2 0 0 0-3.4 0ZM12 9v4M12 17h.01">
-</path>
-</svg>
-       Report problem
-      </button>
-</section>
-<div class="modalbg" id="report">
-<div class="modal">
-<div class="modalhead">
-<h3>
-         Report a problem
-        </h3>
-<button aria-label="Close problem reporting dialog" class="iconbtn" onclick="closeModal('report')" type="button">
-<svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
-<path d="M18 6 6 18M6 6l12 12">
-</path>
-</svg>
-</button>
-</div>
-<div class="modalbody">
-<div class="card" style="box-shadow:none;background:#f8fafc">
-         Problem reporting is not available in this prototype yet. No information is being collected or submitted from this screen.
-        </div>
-</div>
-<div class="modalfoot">
-<button class="btn" onclick="closeModal('report')" type="button">
-         Close
-        </button>
-</div>
-</div>
-</div>
 </main>
 </div>
 <nav class="bottom">

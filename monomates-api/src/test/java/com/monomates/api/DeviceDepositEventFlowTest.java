@@ -171,7 +171,7 @@ class DeviceDepositEventFlowTest {
   }
 
   @Test
-  void acceptedClearPetBottleEarnsTwoTokens() throws Exception {
+  void acceptedClearPetBottleEarnsOneToken() throws Exception {
     Cookie auth = registerUser();
     String sessionId = startSession(auth, ACTIVE_BIN);
 
@@ -188,7 +188,7 @@ class DeviceDepositEventFlowTest {
 
     assertThat(result.getResponse().getStatus()).isEqualTo(200);
     assertThat(field(result, "status")).isEqualTo("ACCEPTED");
-    assertThat(intField(result, "tokensAwarded")).isEqualTo(2);
+    assertThat(intField(result, "tokensAwarded")).isEqualTo(1);
   }
 
   @Test
@@ -217,7 +217,7 @@ class DeviceDepositEventFlowTest {
 
     assertThat(result.getResponse().getStatus()).isEqualTo(200);
     assertThat(field(result, "status")).isEqualTo("ACCEPTED");
-    assertThat(intField(result, "tokensAwarded")).isEqualTo(2);
+    assertThat(intField(result, "tokensAwarded")).isEqualTo(1);
   }
 
   @Test
@@ -242,7 +242,7 @@ class DeviceDepositEventFlowTest {
   }
 
   @Test
-  void validButUnclassifiedDepositEarnsOneToken() throws Exception {
+  void validButUnclassifiedDepositEarnsNoToken() throws Exception {
     Cookie auth = registerUser();
     String sessionId = startSession(auth, ACTIVE_BIN);
 
@@ -259,7 +259,7 @@ class DeviceDepositEventFlowTest {
 
     assertThat(result.getResponse().getStatus()).isEqualTo(200);
     assertThat(field(result, "status")).isEqualTo("VALID_UNCLASSIFIED");
-    assertThat(intField(result, "tokensAwarded")).isEqualTo(1);
+    assertThat(intField(result, "tokensAwarded")).isEqualTo(0);
   }
 
   @Test
@@ -350,14 +350,14 @@ class DeviceDepositEventFlowTest {
     MvcResult replay = submitEvent(DEVICE_CODE, DEVICE_SECRET, eventId, sessionId, true, "24.0", "CLEAR_PET_BOTTLE", "0.95");
     assertThat(replay.getResponse().getStatus()).isEqualTo(200);
     assertThat(field(replay, "id")).isEqualTo(depositId);
-    assertThat(intField(replay, "tokensAwarded")).isEqualTo(2);
+    assertThat(intField(replay, "tokensAwarded")).isEqualTo(1);
 
     Long ledgerRowsForDeposit = jdbc.queryForObject(
       "select count(*) from token_ledger where deposit_id = ?::uuid",
       Long.class,
       depositId
     );
-    assertThat(ledgerRowsForDeposit).isEqualTo(2L); // DEPOSIT_BASE + PET_BONUS, exactly once each
+    assertThat(ledgerRowsForDeposit).isEqualTo(1L); // PET_BONUS only, exactly once (no DEPOSIT_BASE row: base tokens are 0)
   }
 
   @Test
@@ -431,8 +431,8 @@ class DeviceDepositEventFlowTest {
     }
     assertThat(okCount.get()).as("both concurrent duplicates must resolve to the same successful result").isEqualTo(2);
     assertThat(field(resultA, "id")).isEqualTo(field(resultB, "id"));
-    assertThat(intField(resultA, "tokensAwarded")).isEqualTo(2);
-    assertThat(intField(resultB, "tokensAwarded")).isEqualTo(2);
+    assertThat(intField(resultA, "tokensAwarded")).isEqualTo(1);
+    assertThat(intField(resultB, "tokensAwarded")).isEqualTo(1);
 
     Long depositCount = jdbc.queryForObject(
       "select count(*) from deposits where session_id = ?::uuid",
@@ -446,6 +446,6 @@ class DeviceDepositEventFlowTest {
       Long.class,
       field(resultA, "id")
     );
-    assertThat(ledgerCount).as("no duplicate reward from the race").isEqualTo(2L);
+    assertThat(ledgerCount).as("no duplicate reward from the race").isEqualTo(1L);
   }
 }

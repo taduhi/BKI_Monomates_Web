@@ -1,2 +1,2 @@
 code	name	description	base_tokens	bonus_tokens	active
-CLEAR_PET_BOTTLE	Clear PET bottle	Empty, clear PET bottle accepted by the MonoMates pilot.	1	1	true
+CLEAR_PET_BOTTLE	Clear PET bottle	Empty, clear PET bottle with no liquid or visible residue.	0	1	true

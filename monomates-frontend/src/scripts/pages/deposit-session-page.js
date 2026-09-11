@@ -10,14 +10,6 @@ import { renderTokenBalancePill } from "../components/token-balance.js";
 await requireAuthentication();
 renderTokenBalancePill();
 
-// Always rendered for every logged-in account, identically — there is no
-// client-side identity check left here on purpose. Real authorization lives
-// entirely server-side in DemoSecretSortController (only the account whose
-// email matches app.demo.secret-account-email gets a real effect; any other
-// account gets a 404 and the click is silently a no-op). Looking like a
-// small decorative "sensor status" indicator strip on every account, with
-// no code path that reveals which account is special, is stronger secrecy
-// than hiding the markup only for one account.
 function injectSecretSortControls() {
   const card = document.querySelector(".card.session");
   if (!card || document.getElementById("secretSortDots")) return;
@@ -37,11 +29,6 @@ function injectSecretSortControls() {
     return b;
   };
 
-  // No client-side status gate: whichever session is currently loaded is
-  // sent as-is, and the backend alone decides whether it is still valid.
-  // This is deliberate — the button must keep working for the one account
-  // that is allowed to use it regardless of session/scan state, and it must
-  // stay a harmless no-op (a 404 swallowed here) for every other account.
   const sort = async (outcome, buttonEl) => {
     if (!currentSession?.sessionId || secretSortPending) return;
     secretSortPending = true;
@@ -50,10 +37,6 @@ function injectSecretSortControls() {
     clearTimeout(pollTimeout);
     pollTimeout = null;
     try {
-      // The controls deliberately give no immediate visual response. They
-      // emulate the hardware taking two seconds to resolve the item. Run the
-      // request during that delay instead of adding network latency after it;
-      // the result is revealed only when both have completed.
       const request = secretSort(sessionId, outcome).then(
         (result) => ({ result }),
         (error) => ({ error })
@@ -69,9 +52,6 @@ function injectSecretSortControls() {
         renderSecretSortResult(outcome, result);
       }
     } catch (error) {
-      // A normal account receives 404 from the server and must see absolutely
-      // nothing. Other failures also stay out of this secret UI; normal
-      // session polling resumes and remains the only visible source of truth.
       if (!(error instanceof ApiError && error.status === 404)) {
         console.error(error);
       }
@@ -95,11 +75,11 @@ function injectSecretSortControls() {
 }
 
 function showPointsPopup(anchorEl, tokensAwarded) {
-  if (!anchorEl) return;
+  if (!anchorEl || tokensAwarded <= 0) return;
   const popup = document.createElement("span");
   popup.className = "secret-sort-popup";
-  popup.style.background = tokensAwarded > 0 ? "#15803d" : "#64748b";
-  popup.textContent = `${tokensAwarded > 0 ? "+" : ""}${tokensAwarded} PT`;
+  popup.style.background = "#15803d";
+  popup.textContent = `+${tokensAwarded} PT`;
   anchorEl.appendChild(popup);
   setTimeout(() => popup.remove(), 1600);
 }
@@ -142,6 +122,17 @@ const SECRET_SORT_RESULTS = {
     toastType: "error"
   }
 };
+
+const BIN_STATUS_LABELS = {
+  ACTIVE: "Available",
+  FULL: "Full",
+  MAINTENANCE: "Maintenance",
+  OFFLINE: "Offline"
+};
+
+function binStatusLabel(status) {
+  return BIN_STATUS_LABELS[status] ?? "Unavailable";
+}
 
 function renderSecretSortResult(outcome, result) {
   const meta = SECRET_SORT_RESULTS[outcome];
@@ -216,9 +207,9 @@ function renderScanChooser(scanError) {
   msg.textContent = "Use your phone or laptop camera to scan the QR code printed on a bin, or open a bin from the list.";
   timer.classList.add("hidden");
   reward.classList.add("hidden");
-  note.textContent = scanError || "A session only starts after a specific bin has been selected.";
+  note.textContent = scanError || "Choose a bin before starting a deposit.";
   actions.innerHTML =
-    '<button class="btn" id="startScanBtn" type="button">Scan with camera</button>' +
+    '<button class="btn" id="startScanBtn" type="button">Scan</button>' +
     '<a class="btn2" href="../bins/index.html">Browse available bins</a>';
   document.getElementById("startScanBtn").addEventListener("click", startCameraScan);
   line1.textContent = "Choose a bin";
@@ -260,15 +251,12 @@ async function startCameraScan() {
       const frame = canvasContext.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
       const result = jsQR(frame.data, frame.width, frame.height);
       if (result?.data) {
-        // Freeze on the exact frame the code was decoded from — a still,
-        // visible capture the person can see matched — before releasing the
-        // camera and comparing the decoded payload with the real bin list.
         scanVideo.pause();
         badge.className = "badge blue";
         badge.textContent = "QR captured";
         title.textContent = "Reading the QR content…";
-        msg.textContent = "The QR code was decoded. Matching it to a MonoMates bin…";
-        note.textContent = "Checking this bin's records…";
+        msg.textContent = "We found the QR code and are checking the bin…";
+        note.textContent = "Checking bin details…";
         actions.innerHTML = "";
         showDecodedQrResult(result.data);
         return;
@@ -286,58 +274,50 @@ async function showDecodedQrResult(decodedText) {
     const bins = await getBins();
     const bin = findBinForQrPayload(bins, payload);
     stopCameraScan();
-    renderDecodedQrResult(payload, bin);
+    renderDecodedQrResult(bin);
   } catch (error) {
     stopCameraScan();
     const message = error instanceof ApiError
       ? error.message
-      : "Could not check the decoded QR against the bin list.";
+      : "Could not check this QR code against available bins.";
     renderScanChooser(message);
   }
 }
 
-function renderDecodedQrResult(payload, bin) {
-  const candidate = payload.candidates[0] ?? "—";
+function renderDecodedQrResult(bin) {
   const isAvailable = bin?.status === "ACTIVE";
+  const statusLabel = bin ? binStatusLabel(bin.status) : "";
 
   vis.className = `visual ${bin ? "success" : "partial"}`;
   vis.innerHTML = bin ? ICONS.success : ICONS.fail;
   badge.className = `badge ${bin ? "green" : "orange"}`;
-  badge.textContent = bin ? "Bin matched" : "QR decoded";
+  badge.textContent = bin ? "Bin found" : "Not recognized";
   title.textContent = bin ? "MonoMates bin found" : "No matching bin found";
   msg.textContent = bin
-    ? "The decoded value matches a bin currently registered in MonoMates."
-    : "The camera read this QR, but its value does not match any registered bin.";
+    ? "Check the bin details below before continuing."
+    : "This QR code is not linked to an available MonoMates bin.";
   timer.classList.add("hidden");
   reward.classList.add("hidden");
 
   note.innerHTML = `
     <div class="scan-result" aria-live="polite">
-      <div class="scan-result__row">
-        <span>Decoded text</span>
-        <code>${escapeHtml(payload.text)}</code>
-      </div>
-      <div class="scan-result__row">
-        <span>Compared value</span>
-        <code>${escapeHtml(candidate)}</code>
-      </div>
       ${bin ? `
         <div class="scan-result__row">
-          <span>Bin QR ID</span>
+          <span>Bin</span>
+          <strong>${escapeHtml(bin.name)}</strong>
+        </div>
+        <div class="scan-result__row">
+          <span>Bin code</span>
           <strong>${escapeHtml(bin.publicCode)}</strong>
         </div>
         <div class="scan-result__row">
-          <span>Bin record ID</span>
-          <code>${escapeHtml(bin.id)}</code>
-        </div>
-        <div class="scan-result__row">
-          <span>Bin</span>
-          <strong>${escapeHtml(bin.name)} · ${escapeHtml(bin.status)}</strong>
+          <span>Status</span>
+          <strong>${escapeHtml(statusLabel)}</strong>
         </div>
       ` : `
         <div class="scan-result__row">
-          <span>Match result</span>
-          <strong>Not found in the current bin list</strong>
+          <span>Result</span>
+          <strong>Try another MonoMates bin QR code.</strong>
         </div>
       `}
     </div>
@@ -365,15 +345,15 @@ function renderDecodedQrResult(payload, bin) {
   }
   document.getElementById("scanAgainBtn").addEventListener("click", startCameraScan);
 
-  line1.textContent = "QR decoded";
-  line1m.textContent = payload.text;
+  line1.textContent = "QR code read";
+  line1m.textContent = "Code read successfully";
   line2.textContent = bin ? "Bin matched" : "No bin match";
   line2m.textContent = bin ? bin.publicCode : "Try another QR code";
   line3.textContent = isAvailable ? "Ready to continue" : "Session not started";
   line3m.textContent = isAvailable
     ? "Confirm the matched bin first"
     : bin
-      ? `Bin status: ${bin.status}`
+      ? `This bin is currently ${statusLabel.toLowerCase()}`
       : "No registered bin was selected";
 }
 
@@ -432,7 +412,7 @@ async function retryCurrentBin() {
   msg.textContent = `Keeping ${binCode} selected so you can try the item again.`;
   timer.classList.add("hidden");
   reward.classList.add("hidden");
-  note.textContent = "Requesting a fresh deposit window…";
+  note.textContent = "Opening a new deposit session…";
   actions.innerHTML = '<button class="btn" type="button" disabled>Starting…</button>';
   line2.textContent = "Restarting session";
   line2m.textContent = "Using the same bin";
@@ -464,13 +444,13 @@ function renderSession(session) {
     msg.textContent = "QR scanned successfully. Make one deposit within the active session window.";
     timer.classList.remove("hidden");
     reward.classList.add("hidden");
-    note.textContent = "QR only starts this session. No token is awarded until a valid physical deposit event is linked.";
+    note.textContent = "Your reward is added after the bin confirms your deposit.";
     actions.innerHTML = '<button class="btndanger" id="cancelBtn">Cancel session</button>';
     document.getElementById("cancelBtn").addEventListener("click", handleCancel);
     line2.textContent = "Waiting for item";
-    line2m.textContent = "Polling every 1.5 seconds";
-    line3.textContent = "Reward decision";
-    line3m.textContent = "Pending hardware event";
+    line2m.textContent = "Checking for your item";
+    line3.textContent = "Deposit result";
+    line3m.textContent = "Waiting for confirmation";
     startCountdown(session.startedAt, session.expiresAt);
     return;
   }
@@ -484,29 +464,29 @@ function renderSession(session) {
     const tokens = session.tokensAwarded;
     reward.classList.remove("hidden");
     amount.textContent = `+${tokens} PT`;
-    if (tokens >= 2) {
+    if (tokens >= 1) {
       badge.className = "badge green";
       badge.textContent = "Rewarded";
       vis.className = "visual success";
       vis.innerHTML = ICONS.success;
       title.textContent = "Accepted clear bottle detected";
-      msg.textContent = "The valid deposit and accepted-bottle reward are grouped into one activity.";
+      msg.textContent = "Your deposit was accepted and the reward was added.";
       amount.style.color = "#15803d";
-      breakdown.innerHTML = '<div class="drow"><span>Valid deposit</span><strong>+1 PT</strong></div><div class="drow"><span>Accepted clear bottle</span><strong>+1 PT</strong></div>';
+      breakdown.innerHTML = '<div class="drow"><span>Accepted clear bottle</span><strong>+1 PT</strong></div>';
     } else {
       badge.className = "badge orange";
-      badge.textContent = "Valid deposit";
+      badge.textContent = "No reward";
       vis.className = "visual partial";
       vis.innerHTML = ICONS.success;
       title.textContent = "Deposit detected";
-      msg.textContent = "You earned the valid-deposit token. The bottle check was uncertain.";
+      msg.textContent = "A deposit was detected, but it could not be confirmed as an accepted bottle, so no reward was added.";
       amount.style.color = "#b45309";
-      breakdown.innerHTML = '<div class="drow"><span>Valid deposit</span><strong>+1 PT</strong></div><div class="drow"><span>Camera result</span><strong>Uncertain</strong></div>';
+      breakdown.innerHTML = '<div class="drow"><span>Accepted clear bottle</span><strong>Not confirmed</strong></div>';
     }
     note.textContent = "This result has been recorded to your activity.";
     actions.innerHTML = '<a class="btn" href="../activity/index.html">View activity</a><a class="btn2" href="../bins/index.html">Find another bin</a>';
     line3.textContent = `${tokens} PT awarded`;
-    line3m.textContent = "Transaction confirmed";
+    line3m.textContent = "Reward added to balance";
     if (tokens > 0) renderTokenBalancePill();
   } else if (session.status === "EXPIRED") {
     badge.className = "badge red";
@@ -525,11 +505,11 @@ function renderSession(session) {
     vis.className = "visual fail";
     vis.innerHTML = ICONS.fail;
     title.textContent = "Item not accepted";
-    msg.textContent = "The system could not confirm a valid deposit. No token was awarded.";
+    msg.textContent = "The bin could not confirm a valid deposit. No token was awarded.";
     note.textContent = "A QR scan alone is never enough to earn a reward.";
     renderSameBinRetryActions();
     line3.textContent = "0 PT awarded";
-    line3m.textContent = "No transaction created";
+    line3m.textContent = "No reward was added";
   } else if (session.status === "CANCELLED") {
     badge.className = "badge gray";
     badge.textContent = "Cancelled";
