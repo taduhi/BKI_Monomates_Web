@@ -68,7 +68,7 @@ public class BinService {
       )
     );
     RecyclingBin b = new RecyclingBin(
-      r.publicCode().trim().toUpperCase(Locale.ROOT),
+      r.publicCode().trim(),
       r.name().trim(),
       l,
       r.status(),
