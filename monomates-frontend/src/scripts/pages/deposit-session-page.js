@@ -43,54 +43,122 @@ function injectSecretSortControls() {
   // that is allowed to use it regardless of session/scan state, and it must
   // stay a harmless no-op (a 404 swallowed here) for every other account.
   const sort = async (outcome) => {
-    if (!currentSession?.sessionId) {
-      // No API call happens without a session id, so nothing here can leak
-      // account identity — every account sees this exact message in this
-      // exact circumstance. Without it, clicking before a session exists
-      // (e.g. still on the "choose a bin" or "scanning" screen, where these
-      // dots are also rendered) looked identical to the button being dead.
-      window.toast?.("Start a deposit session before using this.", "error");
-      return;
-    }
+    if (!currentSession?.sessionId || secretSortPending) return;
+    secretSortPending = true;
     const sessionId = currentSession.sessionId;
+    const generation = ++pollGeneration;
+    clearTimeout(pollTimeout);
+    pollTimeout = null;
     try {
-      await secretSort(sessionId, outcome);
-      // Render the result immediately instead of waiting for the next poll
-      // tick (up to POLL_INTERVAL_MS later) — a click should feel instant.
-      renderSession(await getDepositSession(sessionId));
+      // The controls deliberately give no immediate visual response. They
+      // emulate the hardware taking two seconds to resolve the item. Run the
+      // request during that delay instead of adding network latency after it;
+      // the result is revealed only when both have completed.
+      const request = secretSort(sessionId, outcome).then(
+        (result) => ({ result }),
+        (error) => ({ error })
+      );
+      const [settled] = await Promise.all([
+        request,
+        new Promise((resolve) => setTimeout(resolve, SECRET_SORT_DELAY_MS))
+      ]);
+      if (settled.error) throw settled.error;
+      const { result } = settled;
+      if (currentSession?.sessionId === sessionId) {
+        renderSecretSortResult(outcome, result);
+      }
     } catch (error) {
-      // A 404 here just means "this isn't the demo account" (see the secrecy
-      // note above) and must stay completely silent. Any other failure —
-      // most commonly the 60-second session window already expired before
-      // the click — is a real, demo-account-only error and must stay
-      // visible: silently swallowing it made a real rejection look
-      // identical to the button doing nothing.
-      if (error instanceof ApiError && error.status === 404) return;
-      const message = error instanceof ApiError ? error.message : "Could not resolve this deposit.";
-      window.toast?.(message, "error");
+      // A normal account receives 404 from the server and must see absolutely
+      // nothing. Other failures also stay out of this secret UI; normal
+      // session polling resumes and remains the only visible source of truth.
+      if (!(error instanceof ApiError && error.status === 404)) {
+        console.error(error);
+      }
+      if (
+        currentSession?.sessionId === sessionId &&
+        currentSession.status === "ACTIVE"
+      ) {
+        pollSession(sessionId, generation);
+      }
+    } finally {
+      secretSortPending = false;
     }
   };
 
   wrap.append(
-    dot("#22c55e", "Đạt yêu cầu", () => sort("ACCEPTED_PET")),
-    dot("#ef4444", "Không đạt yêu cầu", () => sort("VALID_UNCERTAIN")),
-    dot("#eab308", "Chưa có vật phẩm", () => sort("REJECTED"))
+    dot("#22c55e", "Accepted", () => sort("ACCEPTED_PET")),
+    dot("#ef4444", "Not accepted", () => sort("VALID_UNCERTAIN")),
+    dot("#eab308", "Invalid", () => sort("REJECTED"))
   );
   card.appendChild(wrap);
 }
 
 const POLL_INTERVAL_MS = 1500;
+const SECRET_SORT_DELAY_MS = 2000;
 
 let pollTimeout;
 let countdownInterval;
 let currentSession = null;
 let pollGeneration = 0;
+let secretSortPending = false;
 
 const ICONS = {
   waiting: '<svg aria-hidden="true" class="ico xl" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"></path></svg>',
   success: '<svg aria-hidden="true" class="ico xl" viewBox="0 0 24 24"><path d="m20 6-11 11-5-5"></path></svg>',
   fail: '<svg aria-hidden="true" class="ico xl" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"></path></svg>'
 };
+
+const SECRET_SORT_RESULTS = {
+  ACCEPTED_PET: {
+    label: "Accepted",
+    badgeClass: "green",
+    visualClass: "success",
+    icon: ICONS.success,
+    toastType: "success"
+  },
+  VALID_UNCERTAIN: {
+    label: "Not accepted",
+    badgeClass: "orange",
+    visualClass: "partial",
+    icon: ICONS.fail,
+    toastType: "error"
+  },
+  REJECTED: {
+    label: "Invalid",
+    badgeClass: "red",
+    visualClass: "fail",
+    icon: ICONS.fail,
+    toastType: "error"
+  }
+};
+
+function renderSecretSortResult(outcome, result) {
+  const meta = SECRET_SORT_RESULTS[outcome];
+  if (!meta) return;
+
+  clearTimers();
+  currentSession = {
+    ...currentSession,
+    status: outcome === "REJECTED" ? "REJECTED" : "COMPLETED",
+    tokensAwarded: result.tokensAwarded
+  };
+  badge.className = `badge ${meta.badgeClass}`;
+  badge.textContent = meta.label;
+  vis.className = `visual ${meta.visualClass}`;
+  vis.innerHTML = meta.icon;
+  title.textContent = meta.label;
+  msg.textContent = "The result has been recorded.";
+  timer.classList.add("hidden");
+  reward.classList.add("hidden");
+  note.textContent = meta.label;
+  renderSameBinRetryActions();
+  line2.textContent = "Processed";
+  line2m.textContent = "Session ended";
+  line3.textContent = meta.label;
+  line3m.textContent = "The result has been recorded";
+  if (result.tokensAwarded > 0) renderTokenBalancePill();
+  window.toast?.(meta.label, meta.toastType);
+}
 
 function clearTimers() {
   clearTimeout(pollTimeout);
