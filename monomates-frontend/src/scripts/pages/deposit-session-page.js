@@ -449,7 +449,7 @@ async function retryCurrentBin() {
   await beginSessionForBin(binCode);
 }
 
-function renderSameBinRetryActions(label = "Try this bin again") {
+function renderSameBinRetryActions(label = "Scan item") {
   actions.innerHTML = `<button class="btn" id="retryCurrentBinBtn" type="button">${escapeHtml(label)}</button><a class="btn2" href="../bins/index.html">Choose another bin</a>`;
   document.getElementById("retryCurrentBinBtn").addEventListener("click", retryCurrentBin);
 }
@@ -552,7 +552,7 @@ function renderSession(session) {
     title.textContent = "Not accepted";
     msg.textContent = "The bin could not confirm a valid deposit. No token was awarded.";
     note.textContent = "A QR scan alone is never enough to earn a reward.";
-    renderSameBinRetryActions("Scan item");
+    renderSameBinRetryActions();
     line3.textContent = "0 PT awarded";
     line3m.textContent = "No reward was added";
   } else if (session.status === "CANCELLED") {
