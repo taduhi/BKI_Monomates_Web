@@ -11,6 +11,7 @@ public record SessionResponse(
   String binName,
   Instant startedAt,
   Instant expiresAt,
+  Instant scanRequestedAt,
   Instant completedAt,
   DepositResponse deposit,
   int tokensAwarded
@@ -27,6 +28,7 @@ public record SessionResponse(
       s.getBin().getName(),
       s.getStartedAt(),
       s.getExpiresAt(),
+      s.getScanRequestedAt(),
       s.getCompletedAt(),
       d,
       t

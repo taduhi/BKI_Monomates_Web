@@ -67,6 +67,7 @@ public class DepositProcessingService {
     if (!s.getUser().getId().equals(user.getId())) {
       throw new NotFoundException("Deposit session was not found.");
     }
+    s.requestScan(Instant.now());
     Device d = devices
       .findFirstByBin_Id(s.getBin().getId())
       .orElseThrow(() ->
@@ -159,6 +160,9 @@ public class DepositProcessingService {
     }
     if (s.getStatus() != SessionStatus.ACTIVE) throw new BusinessRuleException(
       "The deposit session is not active."
+    );
+    if (s.getScanRequestedAt() == null) throw new BusinessRuleException(
+      "No item scan has been requested for this session."
     );
     DeviceEvent e = events.save(
       new DeviceEvent(

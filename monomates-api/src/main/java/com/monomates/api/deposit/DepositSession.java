@@ -34,6 +34,9 @@ public class DepositSession extends BaseEntity {
   @Column(name = "completed_at")
   private Instant completedAt;
 
+  @Column(name = "scan_requested_at")
+  private Instant scanRequestedAt;
+
   protected DepositSession() {}
 
   public DepositSession(
@@ -77,6 +80,16 @@ public class DepositSession extends BaseEntity {
 
   public Instant getCompletedAt() {
     return completedAt;
+  }
+
+  public Instant getScanRequestedAt() {
+    return scanRequestedAt;
+  }
+
+  public void requestScan(Instant requestedAt) {
+    if (status == SessionStatus.ACTIVE && scanRequestedAt == null) {
+      scanRequestedAt = requestedAt;
+    }
   }
 
   public boolean isExpiredAt(Instant n) {

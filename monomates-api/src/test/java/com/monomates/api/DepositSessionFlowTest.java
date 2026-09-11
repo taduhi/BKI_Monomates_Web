@@ -6,6 +6,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import jakarta.servlet.http.Cookie;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,6 +43,8 @@ class DepositSessionFlowTest {
   private static final String ACTIVE_BIN = "BIN-HCMUT-001";
   private static final String SECOND_ACTIVE_BIN = "BIN-YOUTH-001";
   private static final String MAINTENANCE_BIN = "BIN-D10-001";
+  private static final String DEVICE_CODE = "DEV-HCMUT-001";
+  private static final String DEVICE_SECRET = "demo-device-secret-hcmut";
 
   @Autowired
   private WebApplicationContext context;
@@ -130,6 +134,55 @@ class DepositSessionFlowTest {
       .andExpect(jsonPath("$.balance").value(0));
 
     cancelSession(auth, field(started, "sessionId"));
+  }
+
+  @Test
+  void itemScanRequestIsOwnedIdempotentAndReturnedToTheBinsDevice() throws Exception {
+    Cookie owner = registerUser();
+    Cookie stranger = registerUser();
+    MvcResult started = startSession(owner, ACTIVE_BIN);
+    String sessionId = field(started, "sessionId");
+
+    String heartbeatBody = """
+      {"deviceCode":"%s","deviceSecret":"%s","firmwareVersion":"test"}
+      """.formatted(DEVICE_CODE, DEVICE_SECRET);
+    mvc
+      .perform(post("/api/v1/device/heartbeat").contentType(MediaType.APPLICATION_JSON).content(heartbeatBody))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.command").value("IDLE"));
+
+    mvc
+      .perform(post("/api/v1/sessions/{id}/scan", sessionId).with(csrf()).cookie(stranger))
+      .andExpect(status().isNotFound());
+
+    MvcResult requested = mvc
+      .perform(post("/api/v1/sessions/{id}/scan", sessionId).with(csrf()).cookie(owner))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("ACTIVE"))
+      .andReturn();
+    String requestedAt = field(requested, "scanRequestedAt");
+    assertThat(requestedAt).isNotBlank();
+
+    MvcResult repeated = mvc
+      .perform(post("/api/v1/sessions/{id}/scan", sessionId).with(csrf()).cookie(owner))
+      .andExpect(status().isOk())
+      .andReturn();
+    Duration timestampDifference = Duration.between(
+      Instant.parse(requestedAt),
+      Instant.parse(field(repeated, "scanRequestedAt"))
+    ).abs();
+    assertThat(timestampDifference).isLessThanOrEqualTo(Duration.ofNanos(1_000));
+
+    mvc
+      .perform(post("/api/v1/device/heartbeat").contentType(MediaType.APPLICATION_JSON).content(heartbeatBody))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.command").value("SCAN_ITEM"))
+      .andExpect(jsonPath("$.sessionId").value(sessionId));
+
+    cancelSession(owner, sessionId);
+    mvc
+      .perform(post("/api/v1/sessions/{id}/scan", sessionId).with(csrf()).cookie(owner))
+      .andExpect(status().isUnprocessableEntity());
   }
 
   @Test
@@ -229,6 +282,9 @@ class DepositSessionFlowTest {
       assertThat(started.getResponse().getStatus())
         .as("admin scan #%d should never be blocked by the daily limit", i + 1)
         .isEqualTo(200);
+      mvc
+        .perform(post("/api/v1/sessions/{id}/scan", field(started, "sessionId")).with(csrf()).cookie(admin))
+        .andExpect(status().isOk());
       cancelSession(admin, field(started, "sessionId"));
     }
   }

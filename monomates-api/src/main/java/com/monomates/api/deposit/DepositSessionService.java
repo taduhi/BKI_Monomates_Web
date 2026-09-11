@@ -121,6 +121,17 @@ public class DepositSessionService {
     return response(s);
   }
 
+  @Transactional
+  public SessionResponse requestScan(UserAccount u, UUID id) {
+    DepositSession s = ownedForUpdate(u, id);
+    refresh(s);
+    if (s.getStatus() != SessionStatus.ACTIVE) throw new BusinessRuleException(
+      "Only an active session can scan an item."
+    );
+    s.requestScan(Instant.now());
+    return response(s);
+  }
+
   private DepositSession ownedForUpdate(UserAccount u, UUID id) {
     DepositSession s = sessions
       .findByIdForUpdate(id)

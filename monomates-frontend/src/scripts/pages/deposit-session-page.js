@@ -1,7 +1,7 @@
 import jsQR from "jsqr";
 import { requireAuthentication } from "../guards/auth-guard.js";
 import { getBins, startDepositSession } from "../api/bins-api.js";
-import { getDepositSession, cancelDepositSession, secretSort } from "../api/deposit-api.js";
+import { getDepositSession, requestItemScan, cancelDepositSession, secretSort } from "../api/deposit-api.js";
 import { ApiError } from "../api/api-client.js";
 import { queryParam, escapeHtml } from "../utils/dom.js";
 import { findBinForQrPayload, parseQrPayload } from "../utils/qr-code.js";
@@ -37,7 +37,12 @@ function injectSecretSortControls() {
     clearTimeout(pollTimeout);
     pollTimeout = null;
     try {
-      const request = secretSort(sessionId, outcome).then(
+      const request = (async () => {
+        if (!currentSession?.scanRequestedAt) {
+          currentSession = await requestItemScan(sessionId);
+        }
+        return secretSort(sessionId, outcome);
+      })().then(
         (result) => ({ result }),
         (error) => ({ error })
       );
@@ -387,6 +392,23 @@ async function handleCancel() {
   }
 }
 
+async function handleItemScan() {
+  if (!currentSession?.sessionId) return;
+  const sessionId = currentSession.sessionId;
+  document.getElementById("scanItemBtn")?.setAttribute("disabled", "");
+  try {
+    const session = await requestItemScan(sessionId);
+    if (currentSession?.sessionId !== sessionId) return;
+    renderSession(session);
+  } catch (error) {
+    const message = error instanceof ApiError
+      ? error.message
+      : "Could not ask this bin to scan the item.";
+    window.toast?.(message, "error");
+    document.getElementById("scanItemBtn")?.removeAttribute("disabled");
+  }
+}
+
 function persistSessionUrl(session) {
   const url = new URL(window.location.href);
   url.searchParams.set("code", session.binCode);
@@ -427,8 +449,8 @@ async function retryCurrentBin() {
   await beginSessionForBin(binCode);
 }
 
-function renderSameBinRetryActions() {
-  actions.innerHTML = '<button class="btn" id="retryCurrentBinBtn" type="button">Try this bin again</button><a class="btn2" href="../bins/index.html">Choose another bin</a>';
+function renderSameBinRetryActions(label = "Try this bin again") {
+  actions.innerHTML = `<button class="btn" id="retryCurrentBinBtn" type="button">${escapeHtml(label)}</button><a class="btn2" href="../bins/index.html">Choose another bin</a>`;
   document.getElementById("retryCurrentBinBtn").addEventListener("click", retryCurrentBin);
 }
 
@@ -440,15 +462,25 @@ function renderSession(session) {
     badge.innerHTML = `<span class="dot"></span>Session active · ${escapeHtml(session.binCode)}`;
     vis.className = "visual waiting";
     vis.innerHTML = ICONS.waiting;
-    title.textContent = "Insert one empty clear bottle";
-    msg.textContent = "QR scanned successfully. Make one deposit within the active session window.";
+    const scanRequested = Boolean(session.scanRequestedAt);
+    title.textContent = scanRequested
+      ? "Scanning your item"
+      : "Place one item in the scanner";
+    msg.textContent = scanRequested
+      ? "The bin is checking the item. Keep it in place until the result appears."
+      : "When the item is ready, press Scan item to start the bin's camera.";
     timer.classList.remove("hidden");
     reward.classList.add("hidden");
-    note.textContent = "Your reward is added after the bin confirms your deposit.";
-    actions.innerHTML = '<button class="btndanger" id="cancelBtn">Cancel session</button>';
+    note.textContent = scanRequested
+      ? "Waiting for the bin to return Accepted, Not accepted, or Invalid."
+      : "The bin will not scan until you press the button below.";
+    actions.innerHTML = scanRequested
+      ? '<button class="btn" type="button" disabled>Scanning item…</button><button class="btndanger" id="cancelBtn">Cancel session</button>'
+      : '<button class="btn" id="scanItemBtn" type="button">Scan item</button><button class="btndanger" id="cancelBtn">Cancel session</button>';
+    document.getElementById("scanItemBtn")?.addEventListener("click", handleItemScan);
     document.getElementById("cancelBtn").addEventListener("click", handleCancel);
-    line2.textContent = "Waiting for item";
-    line2m.textContent = "Checking for your item";
+    line2.textContent = scanRequested ? "Scanning item" : "Ready for item";
+    line2m.textContent = scanRequested ? "Waiting for the bin" : "Press Scan item when ready";
     line3.textContent = "Deposit result";
     line3m.textContent = "Waiting for confirmation";
     startCountdown(session.startedAt, session.expiresAt);
@@ -518,7 +550,7 @@ function renderSession(session) {
     title.textContent = "Session cancelled";
     msg.textContent = "You cancelled this deposit session. No token was awarded.";
     note.textContent = "";
-    actions.innerHTML = '<a class="btn" href="../bins/index.html">Find another bin</a>';
+    renderSameBinRetryActions("Scan again");
     line3.textContent = "0 PT awarded";
     line3m.textContent = "Cancelled by user";
   }

@@ -45,4 +45,12 @@ public class DepositSessionController {
   ) {
     return sessions.cancel(current.require(j), sessionId);
   }
+
+  @PostMapping("/sessions/{sessionId}/scan")
+  public SessionResponse requestScan(
+    @AuthenticationPrincipal Jwt j,
+    @PathVariable UUID sessionId
+  ) {
+    return sessions.requestScan(current.require(j), sessionId);
+  }
 }
