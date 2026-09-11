@@ -47,21 +47,47 @@ public class DepositSessionService {
       "This recycling bin is not currently available."
     );
     Instant now = Instant.now();
-    sessions
+    DepositSession existingOnThisBin = sessions
       .findByBin_IdAndStatus(b.getId(), SessionStatus.ACTIVE)
-      .ifPresent(existing -> {
-        if (existing.isExpiredAt(now)) {
-          existing.expire();
-          // Hibernate executes inserts before updates during a normal flush.
-          // Flush the expired row now so the partial unique index can accept
-          // the replacement ACTIVE session in this transaction.
-          sessions.saveAndFlush(existing);
-        } else {
-          throw new ConflictException(
-            "This bin already has an active deposit session. Please try again shortly."
-          );
-        }
-      });
+      .orElse(null);
+    if (existingOnThisBin != null) {
+      if (existingOnThisBin.isExpiredAt(now)) {
+        existingOnThisBin.expire();
+        // Hibernate executes inserts before updates during a normal flush.
+        // Flush the expired row now so the partial unique index can accept
+        // the replacement ACTIVE session in this transaction.
+        sessions.saveAndFlush(existingOnThisBin);
+      } else {
+        // There is only one physical rig for this bin. Rather than fail,
+        // attach the caller to the session already in progress — whoever
+        // started it keeps ownership (and the reward), but anyone can now
+        // watch it resolve in real time. This is what lets the fixed demo
+        // account "stand behind" a real user's deposit: it opens the same
+        // bin, sees this exact in-progress session, and its secret controls
+        // can still resolve it (DepositProcessingService.processDemo no
+        // longer requires ownership).
+        return response(existingOnThisBin);
+      }
+    }
+    // Only one deposit can be in progress across the whole system at a
+    // time — there is only one physical sorting rig being operated, not
+    // one per bin. A different bin's still-active session blocks a new one
+    // here; if it has quietly expired, clear it and proceed instead.
+    DepositSession activeElsewhere = sessions
+      .findFirstByStatus(SessionStatus.ACTIVE)
+      .orElse(null);
+    if (activeElsewhere != null) {
+      if (activeElsewhere.isExpiredAt(now)) {
+        activeElsewhere.expire();
+        sessions.saveAndFlush(activeElsewhere);
+      } else {
+        throw new ConflictException(
+          "Bin " +
+          activeElsewhere.getBin().getPublicCode() +
+          " currently has a deposit in progress. Please wait until it finishes."
+        );
+      }
+    }
     LocalDate today = LocalDate.now(LOCAL_ZONE);
     boolean isDemoAccount =
       demoProps.secretAccountEmail() != null &&
@@ -103,9 +129,16 @@ public class DepositSessionService {
     );
   }
 
+  // Deliberately not ownership-restricted: with only one deposit ever in
+  // progress system-wide, anyone signed in may watch it resolve (there is
+  // nothing sensitive in a session's status/timing). Actions that represent
+  // the depositor's own physical steps (cancel, requestScan below) stay
+  // owner-only; only viewing is open.
   @Transactional
   public SessionResponse getForUser(UserAccount u, UUID id) {
-    DepositSession s = ownedForUpdate(u, id);
+    DepositSession s = sessions
+      .findByIdForUpdate(id)
+      .orElseThrow(() -> new NotFoundException("Deposit session was not found."));
     refresh(s);
     return response(s);
   }

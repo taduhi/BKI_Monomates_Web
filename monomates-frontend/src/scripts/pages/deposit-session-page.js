@@ -502,23 +502,24 @@ function renderSession(session) {
 
   if (session.status === "COMPLETED") {
     const tokens = session.tokensAwarded;
+    const accepted = session.deposit?.status === "ACCEPTED";
     reward.classList.remove("hidden");
     amount.textContent = `+${tokens} PT`;
-    if (tokens >= 1) {
+    if (accepted) {
       badge.className = "badge green";
       badge.textContent = "Rewarded";
       vis.className = "visual success";
       vis.innerHTML = ICONS.success;
-      title.textContent = "Accepted clear bottle detected";
+      title.textContent = "Accepted";
       msg.textContent = "Your deposit was accepted and the reward was added.";
       amount.style.color = "#15803d";
       breakdown.innerHTML = '<div class="drow"><span>Accepted clear bottle</span><strong>+1 PT</strong></div>';
     } else {
       badge.className = "badge orange";
-      badge.textContent = "No reward";
+      badge.textContent = "Invalid";
       vis.className = "visual partial";
       vis.innerHTML = ICONS.success;
-      title.textContent = "Deposit detected";
+      title.textContent = "Invalid";
       msg.textContent = "A deposit was detected, but it could not be confirmed as an accepted bottle, so no reward was added.";
       amount.style.color = "#b45309";
       breakdown.innerHTML = '<div class="drow"><span>Accepted clear bottle</span><strong>Not confirmed</strong></div>';
@@ -544,7 +545,7 @@ function renderSession(session) {
     badge.textContent = "Rejected";
     vis.className = "visual fail";
     vis.innerHTML = ICONS.fail;
-    title.textContent = "Item not accepted";
+    title.textContent = "Not accepted";
     msg.textContent = "The bin could not confirm a valid deposit. No token was awarded.";
     note.textContent = "A QR scan alone is never enough to earn a reward.";
     renderSameBinRetryActions();

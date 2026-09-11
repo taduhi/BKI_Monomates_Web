@@ -59,14 +59,16 @@ public class DepositProcessingService {
     UUID sessionId,
     DemoOutcome outcome
   ) {
+    // Deliberately not ownership-restricted: the fixed demo account stands
+    // in for the physical hardware/camera, which resolves whichever deposit
+    // is actually in progress, not only one it happens to own itself. Since
+    // only one session can be ACTIVE system-wide (DepositSessionService.
+    // start), this can never resolve the "wrong" person's deposit.
     DepositSession s = sessions
       .findById(sessionId)
       .orElseThrow(() ->
         new NotFoundException("Deposit session was not found.")
       );
-    if (!s.getUser().getId().equals(user.getId())) {
-      throw new NotFoundException("Deposit session was not found.");
-    }
     s.requestScan(Instant.now(), p.sessionSeconds());
     Device d = devices
       .findFirstByBin_Id(s.getBin().getId())
@@ -160,6 +162,9 @@ public class DepositProcessingService {
     }
     if (s.getStatus() != SessionStatus.ACTIVE) throw new BusinessRuleException(
       "The deposit session is not active."
+    );
+    if (s.getScanRequestedAt() == null) throw new BusinessRuleException(
+      "An item scan has not been requested for this session."
     );
     DeviceEvent e = events.save(
       new DeviceEvent(

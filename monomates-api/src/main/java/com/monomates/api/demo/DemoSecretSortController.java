@@ -19,8 +19,11 @@ import org.springframework.web.bind.annotation.*;
  * deployment. Unlike {@code LocalDemoController}, this endpoint is reachable
  * in every profile, but only the one fixed demo account configured via
  * {@code app.demo.secret-account-email} may use it; any other caller sees a
- * plain 404, matching how {@link DepositProcessingService#processDemo} already
- * hides a session that does not belong to the caller.
+ * plain 404. {@link DepositProcessingService#processDemo} itself is not
+ * ownership-restricted — it deliberately resolves whichever deposit session
+ * is actually active, not only one this account happens to own, since only
+ * one session can be ACTIVE system-wide at a time (see
+ * {@code DepositSessionService#start}).
  */
 @RestController
 @RequestMapping("/api/v1/demo")

@@ -170,21 +170,27 @@ class DepositSessionFlowTest {
   }
 
   @Test
-  void secondSessionOnSameBinIsRejectedWhileFirstIsActive() throws Exception {
+  void secondSessionOnSameBinAttachesToTheExistingActiveOne() throws Exception {
     Cookie ownerA = registerUser();
     Cookie ownerB = registerUser();
 
     MvcResult first = startSession(ownerA, SECOND_ACTIVE_BIN);
     assertThat(first.getResponse().getStatus()).isEqualTo(200);
+    String sessionId = field(first, "sessionId");
 
+    // There is only one physical rig per bin — a second person opening the
+    // same bin attaches to the session already in progress instead of being
+    // rejected, so anyone (e.g. the demo account standing in for the
+    // hardware) can watch it resolve in real time.
     MvcResult second = startSession(ownerB, SECOND_ACTIVE_BIN);
-    assertThat(second.getResponse().getStatus()).isEqualTo(409);
+    assertThat(second.getResponse().getStatus()).isEqualTo(200);
+    assertThat(field(second, "sessionId")).isEqualTo(sessionId);
 
-    cancelSession(ownerA, field(first, "sessionId"));
+    cancelSession(ownerA, sessionId);
   }
 
   @Test
-  void sessionIsNotVisibleToAUserWhoDoesNotOwnIt() throws Exception {
+  void sessionIsVisibleToAnyoneButOnlyCancellableByItsOwner() throws Exception {
     Cookie owner = registerUser();
     Cookie stranger = registerUser();
 
@@ -192,8 +198,17 @@ class DepositSessionFlowTest {
     assertThat(started.getResponse().getStatus()).isEqualTo(200);
     String sessionId = field(started, "sessionId");
 
+    // Viewing is deliberately open to any signed-in account — nothing in a
+    // session response is sensitive, and this is what lets someone else
+    // (the demo account) watch a real user's deposit resolve.
     mvc
       .perform(get("/api/v1/sessions/{id}", sessionId).cookie(stranger))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.sessionId").value(sessionId));
+
+    // Acting on it (cancelling) stays owner-only.
+    mvc
+      .perform(post("/api/v1/sessions/{id}/cancel", sessionId).with(csrf()).cookie(stranger))
       .andExpect(status().isNotFound());
 
     mvc
@@ -274,14 +289,26 @@ class DepositSessionFlowTest {
   }
 
   @Test
-  void exactlyOneOfTwoConcurrentSessionStartsOnTheSameBinSucceeds() throws Exception {
+  void concurrentSessionStartsOnTheSameBinNeverProduceTwoDifferentActiveSessions()
+    throws Exception {
+    // Depending on exact thread scheduling, two truly simultaneous starts on
+    // one bin resolve one of two legitimate ways:
+    //  (a) one request's read happens to run after the other has already
+    //      committed, so it takes the "attach instead of conflict" branch
+    //      (see secondSessionOnSameBinAttachesToTheExistingActiveOne) —
+    //      both calls return 200 with the identical sessionId; or
+    //  (b) both reads run before either commits, neither sees an existing
+    //      row, both attempt to insert, and the partial unique index on
+    //      (bin_id) WHERE status = 'ACTIVE' — the final race-safety net,
+    //      unchanged by this feature — rejects the loser with a conflict.
+    // Which of the two happens is a timing accident, not a bug; what must
+    // never happen is two different sessions both ending up ACTIVE for the
+    // same bin, which this test asserts regardless of which path was hit.
     Cookie userA = registerUser();
     Cookie userB = registerUser();
 
     ExecutorService pool = Executors.newFixedThreadPool(2);
     CyclicBarrier barrier = new CyclicBarrier(2);
-    AtomicInteger okCount = new AtomicInteger();
-    AtomicInteger conflictCount = new AtomicInteger();
 
     MvcResult resultA;
     MvcResult resultB;
@@ -301,17 +328,24 @@ class DepositSessionFlowTest {
       pool.shutdownNow();
     }
 
-    for (MvcResult r : new MvcResult[] { resultA, resultB }) {
-      int status = r.getResponse().getStatus();
-      if (status == 200) okCount.incrementAndGet();
-      else if (status == 409) conflictCount.incrementAndGet();
+    int statusA = resultA.getResponse().getStatus();
+    int statusB = resultB.getResponse().getStatus();
+
+    if (statusA == 200 && statusB == 200) {
+      assertThat(field(resultA, "sessionId"))
+        .as("two 200s on the same bin must be the same session, never two different ones")
+        .isEqualTo(field(resultB, "sessionId"));
+      cancelSession(userA, field(resultA, "sessionId"));
+    } else {
+      assertThat(statusA == 200 || statusB == 200)
+        .as("at least one concurrent start must win")
+        .isTrue();
+      assertThat(statusA == 409 || statusB == 409)
+        .as("the loser of a genuine race must be reported as a conflict")
+        .isTrue();
+      MvcResult winner = statusA == 200 ? resultA : resultB;
+      Cookie winnerAuth = statusA == 200 ? userA : userB;
+      cancelSession(winnerAuth, field(winner, "sessionId"));
     }
-
-    assertThat(okCount.get()).as("exactly one concurrent start should win").isEqualTo(1);
-    assertThat(conflictCount.get()).as("the other must be rejected as a conflict").isEqualTo(1);
-
-    MvcResult winner = resultA.getResponse().getStatus() == 200 ? resultA : resultB;
-    Cookie winnerAuth = resultA.getResponse().getStatus() == 200 ? userA : userB;
-    cancelSession(winnerAuth, field(winner, "sessionId"));
   }
 }

@@ -4,7 +4,6 @@ import com.monomates.api.deposit.*;
 import com.monomates.api.deposit.dto.DepositResponse;
 import com.monomates.api.device.dto.*;
 import jakarta.validation.Valid;
-import java.util.Map;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,7 +26,7 @@ public class DeviceController {
   }
 
   @PostMapping("/heartbeat")
-  public Map<String, Object> heartbeat(@Valid @RequestBody HeartbeatRequest r) {
+  public HeartbeatResponse heartbeat(@Valid @RequestBody HeartbeatRequest r) {
     return devices.heartbeat(r);
   }
 }

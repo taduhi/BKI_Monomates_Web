@@ -246,6 +246,9 @@
            Public code
           </th>
 <th>
+           Connection
+          </th>
+<th>
            Last updated
           </th>
 <th>
@@ -344,6 +347,62 @@
 <button class="btn" id="binSaveButton" type="button">
          Save
         </button>
+</div>
+</div>
+</div>
+<div class="modalbg" id="connectionModal">
+<div class="modal">
+<div class="modalhead">
+<div>
+<h3>Connection settings</h3>
+<p class="muted" id="connectionBinName"></p>
+</div>
+<button aria-label="Close connection settings" class="iconbtn" onclick="closeModal('connectionModal')" type="button">
+<svg aria-hidden="true" class="ico" viewbox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+</button>
+</div>
+<div class="modalbody">
+<form class="grid" id="connectionForm">
+<p class="field-error hidden" id="connectionFormError"></p>
+<div class="field">
+<label>Device</label>
+<div class="input connection-readonly" id="connectionDeviceCode"></div>
+</div>
+<div class="field">
+<label>Connection mode</label>
+<div class="connection-modes" id="connectionModeButtons">
+<button class="btn2" data-mode="AUTO" type="button">Auto</button>
+<button class="btn2" data-mode="USB" type="button">USB</button>
+<button class="btn2" data-mode="WIFI" type="button">Wi-Fi</button>
+</div>
+<small class="muted">Auto uses USB when available, then falls back to the shared Wi-Fi network.</small>
+</div>
+<div class="grid g2">
+<div class="field">
+<label for="connectionPort">Local port</label>
+<input class="input" id="connectionPort" max="65535" min="1" required type="number" value="8000"/>
+</div>
+<div class="field">
+<label for="acceptedDirection">Accepted item direction</label>
+<select class="select" id="acceptedDirection">
+<option value="RIGHT">Right</option>
+<option value="LEFT">Left</option>
+</select>
+</div>
+</div>
+<div class="field">
+<label>Physical output</label>
+<div class="connection-modes direction-routing" id="directionRoutingButtons">
+<button class="btn2" data-swapped="false" type="button">Normal</button>
+<button class="btn2" data-swapped="true" type="button">Swap left/right</button>
+</div>
+<small class="muted">Use Swap when the two physical compartments or servo directions are reversed.</small>
+</div>
+</form>
+</div>
+<div class="modalfoot">
+<button class="btn2" onclick="closeModal('connectionModal')" type="button">Cancel</button>
+<button class="btn" id="connectionSaveButton" type="button">Save connection</button>
 </div>
 </div>
 </div>

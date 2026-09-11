@@ -1,132 +1,113 @@
-# Hardware bridge
+# MonoMates hardware bridge
 
-Connects the physical Class_bin sorter (in the separate, read-only
-`BKI-arduino_app/` folder) to this backend's real hardware-event API,
-`POST /api/v1/device/events/deposit`.
+This local bridge connects the existing, unmodified `BKI-arduino_app`
+hardware to the MonoMates web API. It supports both USB and shared-Wi-Fi
+operation and reads the selected mode from Admin > Bins.
 
-**This repo never edits `BKI-arduino_app/`.** That folder is someone else's
-git history, kept locally for reference only (see `.gitignore`). All new
-code lives here instead; wiring it into their pipeline is a small,
-reversible edit you make yourself in their copy.
+No firmware or file under `BKI-arduino_app` needs to be edited.
 
-## Before you start: confirm the backend has this fix live
+## End-to-end flow
 
-Render (the backend host) can take a while to redeploy after a push —
-sometimes minutes, occasionally much longer. Check first with:
+1. The user scans a bin QR code and presses **Scan item**.
+2. The backend attaches a `SCAN_ITEM` command to that bin's authenticated
+   heartbeat response.
+3. The bridge receives the command. In `AUTO` mode it uses a compatible USB
+   serial device when present, otherwise it listens for the ESP8266 over the
+   shared Wi-Fi network.
+4. The existing hardware pipeline detects an item, captures an ESP32-CAM
+   image, classifies it, and returns `LEFT`, `RIGHT`, or an error.
+5. The bridge maps the configured accepted direction to `Accepted`, the
+   opposite direction to `Not accepted`, and a camera/model/unknown result to
+   `Invalid`. It posts one idempotent event for the exact pending session.
+6. The browser's existing session poll displays the same result.
 
-```bash
-curl -X POST https://bki-monomates-web.onrender.com/api/v1/device/events/deposit \
-  -H "Content-Type: application/json" \
-  -d "{\"deviceCode\":\"DEV-HCMUT-001\",\"deviceSecret\":\"demo-device-secret-hcmut\",\"eventId\":\"probe-1\",\"irDetected\":true,\"weightChangeGrams\":24.0,\"itemType\":\"CLEAR_PET_BOTTLE\",\"classificationConfidence\":0.95}"
+Events received before **Scan item** are ignored. Network failures are retried
+with the same event ID, so a retry cannot grant a reward twice.
+
+## Install
+
+From `hardware-bridge`:
+
+```powershell
+python -m pip install -r requirements.txt
 ```
 
-- `"message":"No active deposit session for this bin."` → **fix is live**, proceed.
-- `"fieldErrors":{"sessionId":"must not be null"}` → **not deployed yet**, wait
-  and retry later; wiring up real hardware against the old backend will just
-  fail with this same error on every event.
+The camera/model dependencies remain owned by the existing hardware project.
+Install its requirements if they are not already present:
 
-## What this does
-
-`send_deposit_event.py` takes the sorting decision the hardware pipeline
-already computes (`"RIGHT"` = bottle, `"LEFT"` = not a bottle — see
-`Class_bin/no_wifi_module/laptop/decision.py`) and reports it to the live
-backend, exactly like a session-linked deposit made through the web app.
-No session id is needed: the backend automatically finds whichever session
-is currently active for that bin (see the "Backend design note" below).
-
-## How to wire it in
-
-In `BKI-arduino_app/Class_bin/no_wifi_module/laptop/app.py`, `reader_loop()`
-currently does:
-
-```python
-if kind == "event":
-    print("Pipeline: capture → predict → decision")
-    link.send_line(decide_from_event(payload))
-    print("Chờ ultrasound tiếp theo…")
+```powershell
+python -m pip install -r ..\BKI-arduino_app\Class_bin\no_wifi_module\requirements.txt
 ```
 
-Change it to call `process_event` directly (it already returns everything
-needed — `decide_from_event` just throws that away) and report the result:
+## Configure
 
-```python
-if kind == "event":
-    print("Pipeline: capture → predict → decision")
-    result = process_event(payload)
-    link.send_line(result["reply"])
-    if result["ok"]:
-        from send_deposit_event import report_deposit_event
-        try:
-            report_deposit_event(
-                decision=result["decision"],
-                confidence=result["confidence"],
-            )
-        except Exception as exc:
-            print("MonoMates report failed (non-fatal):", exc)
-    print("Chờ ultrasound tiếp theo…")
+Set the device identity on the laptop. Do not commit the real secret.
+
+```powershell
+$env:MONOMATES_API_BASE_URL='http://localhost:8080/api/v1'
+$env:MONOMATES_DEVICE_CODE='DEV-HCMUT-001'
+$env:MONOMATES_DEVICE_SECRET='your-device-secret'
+$env:MONOMATES_CAMERA_URL='http://192.168.1.49/capture'
 ```
 
-Then copy (or symlink) `send_deposit_event.py` into
-`BKI-arduino_app/Class_bin/no_wifi_module/laptop/` so the `import` above
-resolves — or add this folder to `PYTHONPATH` instead if you'd rather not
-duplicate the file.
+Use `https://bki-monomates-web.onrender.com/api/v1` as the API URL only after
+the matching backend version has been deployed.
 
-`process_event` and `result_to_decision` are already imported at the top of
-`app.py`, so no new imports are needed there beyond the one shown above.
+Optional variables:
 
-## Configuration
+- `MONOMATES_USB_PORT=COM3` pins a specific USB port; otherwise Mega/CH340 is
+  detected automatically.
+- `MONOMATES_HARDWARE_ROOT` points to the existing
+  `Class_bin/no_wifi_module` directory when it is not next to this repository.
+- `MONOMATES_HEARTBEAT_SECONDS` defaults to `1.0`.
+- `MONOMATES_MINIMUM_CLASSIFICATION_CONFIDENCE` defaults to `0.70`; a lower
+  confidence is reported as `Invalid`, never as an accepted/rejected guess.
 
-Defaults to bin `BIN-HCMUT-001` (device `DEV-HCMUT-001`). Override for a
-different physical bin with environment variables before running
-`python run.py`:
+Check authentication and the Admin-selected settings:
 
-```bash
-set MONOMATES_DEVICE_CODE=DEV-YOUTH-001
-set MONOMATES_DEVICE_SECRET=demo-device-secret-youth
+```powershell
+python monomates_bridge.py --check
 ```
 
-All four seeded devices/secrets (from `monomates-api` migration
-`V8__replace_placeholder_bins_with_real_locations.sql`):
+Start the bridge:
 
-| Bin | Device code | Device secret |
-|---|---|---|
-| BIN-HCMUT-001 | DEV-HCMUT-001 | demo-device-secret-hcmut |
-| BIN-YOUTH-001 | DEV-YOUTH-001 | demo-device-secret-youth |
-| BIN-D10-001 | DEV-D10-001 | demo-device-secret-d10 |
-| BIN-LIBRARY-001 | DEV-LIBRARY-001 | demo-device-secret-library |
+```powershell
+python monomates_bridge.py
+```
 
-`MONOMATES_API_BASE_URL` defaults to the live production backend
-(`https://bki-monomates-web.onrender.com/api/v1`); override it to point at
-a local `docker compose` backend instead while testing.
+## Connection modes
 
-## End-to-end test
+Configure each bin in **Admin > Bins > Configure connection**:
 
-1. On a phone/browser, log in, open the bin matching the device you
-   configured above, and scan it (starts an ACTIVE session).
-2. Trigger the HC-SR04 (put an object within ~20 cm) so the pipeline
-   produces one `RIGHT`/`LEFT` decision.
-3. Watch the balance on the phone update within ~1.5s (the app polls the
-   session every 1.5 seconds) — a real end-to-end deposit, no simulate
-   button involved.
-4. If the bin has no active session (nobody scanned it recently), the
-   backend answers 404 and prints an error here — expected, not a bug.
+- **Auto**: prefer USB; when no compatible COM device exists, listen on the
+  configured Wi-Fi port.
+- **USB**: require the Mega/CH340 serial connection.
+- **Wi-Fi**: expose `POST /api/v1/event` on all laptop network interfaces.
 
-## Backend design note (why no session id is needed)
+`Accepted item direction` controls how the classifier's current LEFT/RIGHT
+output maps to the web result. `Physical output: Swap left/right` independently
+reverses the command returned to the servo, so reversed compartments can be
+corrected from Admin without changing or reflashing hardware code.
 
-`BKI_Monomates_web.md` section 9 specifies that hardware should identify
-itself by bin only; the backend finds the bin's active session. The
-endpoint originally required a session id (fine for the browser-driven demo
-buttons, which already know their own session), which made it unusable by
-real hardware that has no way to learn one. `DeviceDepositEventRequest.sessionId`
-is now optional — see `DepositProcessingService.resolveSession` in
-`monomates-api` — restoring the bin-level lookup the spec always intended.
+The default local port is `8000`. In Wi-Fi mode the existing ESP8266 firmware
+must already target this laptop's current LAN IP and the same port. Because the
+firmware target is hardcoded, changing the port in Admin cannot rewrite the
+board; keep `8000` unless the already-flashed target uses another port. A DHCP
+reservation/static laptop IP is recommended.
 
-## Known simplification: no weight sensor yet
+The bridge reuses the existing read-only camera/model pipeline from
+`BKI-arduino_app`. It does not copy or alter that code.
 
-This sorter has an ultrasonic presence sensor and a camera classifier, but
-no load cell. The backend's reward rule still gates a "valid" deposit on a
-minimum weight, so `send_deposit_event.py` sends a fixed passing placeholder
-only when the camera confirms a bottle — the accept/reject decision itself
-is still made entirely by the camera model, never by this placeholder. Real
-weight validation is a later hardware stage (`BKI_Monomates_web.md`
-section 4.3).
+## Current seeded device identities
+
+For local development, the existing Flyway seed provides:
+
+| Bin | Device code |
+|---|---|
+| `BIN-HCMUT-001` | `DEV-HCMUT-001` |
+| `BIN-YOUTH-001` | `DEV-YOUTH-001` |
+| `BIN-D10-001` | `DEV-D10-001` |
+| `BIN-LIBRARY-001` | `DEV-LIBRARY-001` |
+
+Production secrets should be supplied privately through environment variables
+and rotated separately; they are never displayed in the customer UI.

@@ -28,6 +28,13 @@ public interface DepositSessionRepository
     SessionStatus status
   );
 
+  // Only one deposit can be in progress across the whole system at a time
+  // (there is only one physical sorting rig being operated) — see
+  // DepositSessionService.start(). Bin-scoped locking above still guards the
+  // per-bin insert; this guards the cross-bin invariant on top of it.
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  Optional<DepositSession> findFirstByStatus(SessionStatus status);
+
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("select s from DepositSession s where s.id = :id")
   Optional<DepositSession> findByIdForUpdate(@Param("id") UUID id);

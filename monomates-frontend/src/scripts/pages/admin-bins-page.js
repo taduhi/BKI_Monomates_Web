@@ -1,5 +1,12 @@
 import { requireAdmin } from "../guards/admin-guard.js";
-import { getAdminBins, saveAdminBin, updateAdminBin, deleteAdminBin } from "../api/admin-api.js";
+import {
+  deleteAdminBin,
+  getAdminBins,
+  getAdminDevices,
+  saveAdminBin,
+  updateAdminBin,
+  updateAdminDeviceConnection
+} from "../api/admin-api.js";
 import { ApiError } from "../api/api-client.js";
 import { escapeHtml } from "../utils/dom.js";
 import { setLoading } from "../components/loading.js";
@@ -19,6 +26,10 @@ const STATUS_META = {
 
 let editingBin = null;
 let allBins = [];
+let devicesByBinId = new Map();
+let configuringDevice = null;
+let selectedConnectionMode = "AUTO";
+let swapDirections = false;
 
 function statusMeta(status) {
   return STATUS_META[status] ?? STATUS_META.OFFLINE;
@@ -60,6 +71,75 @@ function openEditModal(bin) {
   openModal("bm");
 }
 window.editBin = openEditModal;
+
+function selectConnectionMode(mode) {
+  selectedConnectionMode = mode;
+  connectionModeButtons.querySelectorAll("button[data-mode]").forEach((button) => {
+    const selected = button.dataset.mode === mode;
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
+}
+
+connectionModeButtons.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-mode]");
+  if (button) selectConnectionMode(button.dataset.mode);
+});
+
+function selectDirectionRouting(swapped) {
+  swapDirections = swapped;
+  directionRoutingButtons.querySelectorAll("button[data-swapped]").forEach((button) => {
+    const selected = (button.dataset.swapped === "true") === swapped;
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
+}
+
+directionRoutingButtons.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-swapped]");
+  if (button) selectDirectionRouting(button.dataset.swapped === "true");
+});
+
+function openConnectionModal(bin) {
+  const device = devicesByBinId.get(bin.id);
+  if (!device) {
+    window.toast?.("No device is configured for this bin.", "error");
+    return;
+  }
+  configuringDevice = device;
+  connectionBinName.textContent = `${bin.name} · ${bin.publicCode}`;
+  connectionDeviceCode.textContent = device.deviceCode;
+  connectionPort.value = String(device.bridgePort ?? 8000);
+  acceptedDirection.value = device.acceptedDirection ?? "RIGHT";
+  selectDirectionRouting(Boolean(device.swapDirections));
+  selectConnectionMode(device.connectionMode ?? "AUTO");
+  connectionFormError.classList.add("hidden");
+  connectionFormError.textContent = "";
+  openModal("connectionModal");
+}
+
+connectionSaveButton.addEventListener("click", async () => {
+  if (!configuringDevice || !connectionForm.reportValidity()) return;
+  connectionFormError.classList.add("hidden");
+  setLoading(connectionSaveButton, true, "Saving…");
+  try {
+    const saved = await updateAdminDeviceConnection(configuringDevice.binId, {
+      connectionMode: selectedConnectionMode,
+      bridgePort: Number(connectionPort.value),
+      acceptedDirection: acceptedDirection.value,
+      swapDirections
+    });
+    devicesByBinId.set(saved.binId, saved);
+    closeModal("connectionModal");
+    window.toast?.("Connection settings saved.", "success");
+    renderBins();
+  } catch (error) {
+    connectionFormError.textContent = error instanceof ApiError ? error.message : "Could not save connection settings.";
+    connectionFormError.classList.remove("hidden");
+  } finally {
+    setLoading(connectionSaveButton, false);
+  }
+});
 
 addBinButton.addEventListener("click", openCreateModal);
 
@@ -109,6 +189,20 @@ async function handleDeleteBin(bin) {
 
 function renderRow(bin) {
   const meta = statusMeta(bin.status);
+  const device = devicesByBinId.get(bin.id);
+  const requestedMode = device?.connectionMode ?? "AUTO";
+  const activeTransport = device?.activeTransport;
+  const heartbeatAge = device?.lastHeartbeatAt
+    ? Date.now() - new Date(device.lastHeartbeatAt).getTime()
+    : Number.POSITIVE_INFINITY;
+  const isConnected = heartbeatAge < 10_000;
+  const connectionText = activeTransport && isConnected
+    ? `${activeTransport === "WIFI" ? "Wi-Fi" : "USB"} bridge online`
+    : requestedMode === "AUTO"
+      ? "Auto"
+      : requestedMode === "WIFI"
+        ? "Wi-Fi"
+        : "USB";
   const tr = document.createElement("tr");
   tr.innerHTML = `
     <td>
@@ -118,9 +212,17 @@ function renderRow(bin) {
     <td><span class="chip ${meta.chipClass}"><span class="dot"></span>${meta.label}</span></td>
     <td>${bin.capacityPercent}%</td>
     <td>${escapeHtml(bin.publicCode)}</td>
+    <td>
+      <div class="tt">${escapeHtml(connectionText)}</div>
+      <div class="tm">Port ${device?.bridgePort ?? 8000}</div>
+      ${device?.swapDirections ? '<div class="tm">Left/right swapped</div>' : ''}
+    </td>
     <td>${bin.updatedAt ? formatDateTime(bin.updatedAt) : "—"}</td>
     <td>
       <div class="actions">
+        <button aria-label="Configure connection" class="iconbtn" type="button" title="Configure connection">
+          <svg aria-hidden="true" class="ico sm" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"></path><circle cx="12" cy="12" r="9"></circle></svg>
+        </button>
         <button aria-label="Edit bin" class="iconbtn" type="button" title="Edit bin">
           <svg aria-hidden="true" class="ico sm" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
         </button>
@@ -130,7 +232,8 @@ function renderRow(bin) {
       </div>
     </td>
   `;
-  const [editButton, deleteButton] = tr.querySelectorAll(".iconbtn");
+  const [connectionButton, editButton, deleteButton] = tr.querySelectorAll(".iconbtn");
+  connectionButton.addEventListener("click", () => openConnectionModal(bin));
   editButton.addEventListener("click", () => openEditModal(bin));
   deleteButton.addEventListener("click", () => handleDeleteBin(bin));
   return tr;
@@ -146,7 +249,7 @@ function renderBins() {
   binsTableBody.innerHTML = "";
   filtered.forEach((bin) => binsTableBody.appendChild(renderRow(bin)));
   if (filtered.length === 0) {
-    binsTableBody.innerHTML = '<tr><td colspan="6"><p class="muted">No bins match these filters.</p></td></tr>';
+    binsTableBody.innerHTML = '<tr><td colspan="7"><p class="muted">No bins match these filters.</p></td></tr>';
   }
   binsCountLabel.textContent = `${filtered.length} of ${allBins.length} bins`;
 }
@@ -157,14 +260,16 @@ adminBinStatusFilter.addEventListener("change", renderBins);
 async function loadBins() {
   binsCountLabel.textContent = "Loading…";
   try {
-    allBins = await getAdminBins();
+    const [bins, devices] = await Promise.all([getAdminBins(), getAdminDevices()]);
+    allBins = bins;
+    devicesByBinId = new Map(devices.map((device) => [device.binId, device]));
     binsTotalValue.textContent = String(allBins.length);
     binsAvailableValue.textContent = String(allBins.filter((b) => b.status === "ACTIVE").length);
     binsAttentionValue.textContent = String(allBins.filter((b) => b.status === "FULL" || b.status === "MAINTENANCE" || b.status === "OFFLINE").length);
     renderBins();
   } catch (error) {
     const message = error instanceof ApiError ? error.message : "Could not load bins.";
-    binsTableBody.innerHTML = `<tr><td colspan="6"><p class="muted">${escapeHtml(message)}</p></td></tr>`;
+    binsTableBody.innerHTML = `<tr><td colspan="7"><p class="muted">${escapeHtml(message)}</p></td></tr>`;
     binsCountLabel.textContent = "Could not load bins";
   }
 }

@@ -286,7 +286,11 @@ public class DemoDataInitializer implements ApplicationRunner {
         row.required("firmware_version")
       );
       if (deviceStatus == DeviceStatus.ACTIVE) {
-        device.heartbeat(row.required("firmware_version"), now.minusSeconds(60));
+        device.heartbeat(
+          row.required("firmware_version"),
+          null,
+          now.minusSeconds(60)
+        );
       }
       devices.save(device);
       result.put(publicCode, savedBin);

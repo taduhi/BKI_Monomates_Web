@@ -115,6 +115,10 @@ class DeviceDepositEventExpiryTest {
       .andReturn();
     String sessionId = json.readTree(started.getResponse().getContentAsString()).path("sessionId").asText();
 
+    mvc
+      .perform(post("/api/v1/sessions/{id}/scan", sessionId).with(csrf()).cookie(auth))
+      .andExpect(status().isOk());
+
     Thread.sleep(2500);
 
     String eventBody = """

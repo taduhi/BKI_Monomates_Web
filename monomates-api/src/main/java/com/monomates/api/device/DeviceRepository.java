@@ -10,6 +10,9 @@ public interface DeviceRepository extends JpaRepository<Device, UUID> {
   @EntityGraph(attributePaths = { "bin", "bin.location", "bin.acceptedItems" })
   Optional<Device> findFirstByBin_Id(UUID binId);
 
+  @EntityGraph(attributePaths = { "bin" })
+  List<Device> findAllByOrderByDeviceCodeAsc();
+
   boolean existsByBin_Id(UUID binId);
 
   void deleteByBin_Id(UUID binId);

@@ -70,3 +70,25 @@
         font-size: 19px;
     }
 }
+.connection-modes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px
+}
+
+.connection-modes .selected {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff
+}
+
+.connection-readonly {
+    display: flex;
+    align-items: center;
+    background: #f8fafc;
+    color: #475569
+}
+
+.direction-routing {
+    grid-template-columns: repeat(2, 1fr)
+}

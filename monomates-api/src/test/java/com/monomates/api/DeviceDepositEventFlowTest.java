@@ -119,6 +119,15 @@ class DeviceDepositEventFlowTest {
   }
 
   private String startSession(Cookie auth, String binCode) throws Exception {
+    String sessionId = startSessionWithoutScan(auth, binCode);
+    mvc
+      .perform(post("/api/v1/sessions/{id}/scan", sessionId).with(csrf()).cookie(auth))
+      .andExpect(status().isOk());
+    return sessionId;
+  }
+
+  private String startSessionWithoutScan(Cookie auth, String binCode)
+    throws Exception {
     MvcResult result = mvc
       .perform(post("/api/v1/bins/{code}/sessions", binCode).with(csrf()).cookie(auth))
       .andExpect(status().isOk())
@@ -239,6 +248,25 @@ class DeviceDepositEventFlowTest {
       .andReturn();
 
     assertThat(result.getResponse().getStatus()).isEqualTo(404);
+  }
+
+  @Test
+  void anEventBeforeTheUserPressesScanItemIsRejected() throws Exception {
+    Cookie auth = registerUser();
+    String sessionId = startSessionWithoutScan(auth, ACTIVE_BIN);
+
+    MvcResult result = submitEvent(
+      DEVICE_CODE,
+      DEVICE_SECRET,
+      "evt-" + UUID.randomUUID(),
+      sessionId,
+      true,
+      "24.0",
+      "CLEAR_PET_BOTTLE",
+      "0.95"
+    );
+
+    assertThat(result.getResponse().getStatus()).isEqualTo(422);
   }
 
   @Test
