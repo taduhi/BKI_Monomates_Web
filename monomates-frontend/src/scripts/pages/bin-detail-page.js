@@ -1,3 +1,4 @@
+import QRCode from "qrcode";
 import { getBin } from "../api/bins-api.js";
 import { ApiError } from "../api/api-client.js";
 import { escapeHtml, queryParam } from "../utils/dom.js";
@@ -88,6 +89,28 @@ function renderBin(bin) {
     scanQrLink.title = `Deposits are unavailable while this bin is ${meta.label.toLowerCase()}.`;
   }
   renderAcceptedItems(bin.acceptedItems);
+  renderBinQr(bin);
+}
+
+// Per BKI_Monomates_web.md section 26: the prototype does not build an
+// in-app camera scanner — a phone's own camera app reads a printed QR code
+// that encodes a URL, and the browser opens it directly. This renders that
+// real, scannable QR (pointing at the exact same session URL the "Scan QR"
+// button already uses) so it can be printed and stuck on the physical bin.
+function renderBinQr(bin) {
+  if (bin.status !== "ACTIVE") {
+    qrCard.classList.add("hidden");
+    return;
+  }
+  const url = `${window.location.origin}/pages/deposit/session.html?code=${encodeURIComponent(bin.publicCode)}`;
+  QRCode.toCanvas(binQrCanvas, url, { width: 180, margin: 1 }, (error) => {
+    if (error) {
+      console.error("Could not render bin QR code", error);
+      qrCard.classList.add("hidden");
+      return;
+    }
+    qrCard.classList.remove("hidden");
+  });
 }
 
 function readSavedLocation() {
