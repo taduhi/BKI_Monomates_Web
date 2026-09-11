@@ -1,3 +1,4 @@
+import jsQR from "jsqr";
 import { requireAuthentication } from "../guards/auth-guard.js";
 import { startDepositSession } from "../api/bins-api.js";
 import { getDepositSession, cancelDepositSession, secretSort } from "../api/deposit-api.js";
@@ -91,24 +92,102 @@ function renderError(message, options = {}) {
     : '<a class="btn" href="../bins/index.html">Back to bins</a>';
 }
 
-function renderBinChooser() {
+let scanStream = null;
+let scanAnimationFrameId = null;
+
+function stopCameraScan() {
+  if (scanAnimationFrameId) cancelAnimationFrame(scanAnimationFrameId);
+  scanAnimationFrameId = null;
+  if (scanStream) scanStream.getTracks().forEach((track) => track.stop());
+  scanStream = null;
+  scanVideo.srcObject = null;
+  scanVideo.classList.add("hidden");
+  vis.classList.remove("hidden");
+}
+
+function renderScanChooser(scanError) {
   clearTimers();
+  stopCameraScan();
   badge.className = "badge gray";
   badge.textContent = "Choose a bin";
   vis.className = "visual waiting";
   vis.innerHTML = ICONS.waiting;
-  title.textContent = "Select an available smart bin";
-  msg.textContent = "Open a bin's details and scan its QR code to begin a deposit session.";
+  title.textContent = "Scan a bin's QR code";
+  msg.textContent = "Use your phone or laptop camera to scan the QR code printed on a bin, or open a bin from the list.";
   timer.classList.add("hidden");
   reward.classList.add("hidden");
-  note.textContent = "A session only starts after a specific bin has been selected.";
-  actions.innerHTML = '<a class="btn" href="../bins/index.html">Browse available bins</a>';
+  note.textContent = scanError || "A session only starts after a specific bin has been selected.";
+  actions.innerHTML =
+    '<button class="btn" id="startScanBtn" type="button">Scan with camera</button>' +
+    '<a class="btn2" href="../bins/index.html">Browse available bins</a>';
+  document.getElementById("startScanBtn").addEventListener("click", startCameraScan);
   line1.textContent = "Choose a bin";
-  line1m.textContent = "Find an available location";
-  line2.textContent = "Scan its QR code";
-  line2m.textContent = "Start from the bin details page";
+  line1m.textContent = "Scan its QR code or pick it from the list";
+  line2.textContent = "Insert one item";
+  line2m.textContent = "Available after a session starts";
   line3.textContent = "Deposit and reward";
   line3m.textContent = "Available after a session starts";
+}
+
+async function startCameraScan() {
+  note.textContent = "Requesting camera access…";
+  try {
+    scanStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" } },
+      audio: false
+    });
+  } catch {
+    renderScanChooser("Could not access a camera. Check permissions, or use the bins list instead.");
+    return;
+  }
+  scanVideo.srcObject = scanStream;
+  await scanVideo.play();
+  vis.classList.add("hidden");
+  scanVideo.classList.remove("hidden");
+  badge.className = "badge blue";
+  badge.textContent = "Scanning…";
+  title.textContent = "Point the camera at a bin's QR code";
+  msg.textContent = "Hold steady and keep the whole QR code inside the frame.";
+  note.textContent = "Looking for a QR code…";
+  actions.innerHTML = '<button class="btn2" id="cancelScanBtn" type="button">Cancel</button>';
+  document.getElementById("cancelScanBtn").addEventListener("click", () => renderScanChooser());
+  const canvasContext = scanCanvas.getContext("2d");
+  const scanFrame = () => {
+    if (scanVideo.readyState === scanVideo.HAVE_ENOUGH_DATA) {
+      scanCanvas.width = scanVideo.videoWidth;
+      scanCanvas.height = scanVideo.videoHeight;
+      canvasContext.drawImage(scanVideo, 0, 0, scanCanvas.width, scanCanvas.height);
+      const frame = canvasContext.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
+      const result = jsQR(frame.data, frame.width, frame.height);
+      const publicCode = result?.data ? extractBinCode(result.data) : null;
+      if (publicCode) {
+        stopCameraScan();
+        const url = new URL(window.location.href);
+        url.searchParams.set("code", publicCode);
+        url.searchParams.delete("sessionId");
+        window.history.replaceState(null, "", url);
+        backToBinLink.href = `../bins/detail.html?code=${encodeURIComponent(publicCode)}`;
+        beginSessionForBin(publicCode);
+        return;
+      }
+      // A QR code was found but it isn't a MonoMates bin URL (or no code was
+      // found at all this frame) — keep scanning instead of giving up.
+      note.textContent = result?.data
+        ? "That QR code isn't a MonoMates bin — still looking…"
+        : "Looking for a QR code…";
+    }
+    scanAnimationFrameId = requestAnimationFrame(scanFrame);
+  };
+  scanAnimationFrameId = requestAnimationFrame(scanFrame);
+}
+
+function extractBinCode(text) {
+  try {
+    const url = new URL(text);
+    return url.searchParams.get("code");
+  } catch {
+    return null;
+  }
 }
 
 function startCountdown(startedAtIso, expiresAtIso) {
@@ -260,24 +339,8 @@ async function pollSession(sessionId, generation = pollGeneration) {
   }
 }
 
-async function init() {
-  const publicCode = queryParam("code");
-  const existingSessionId = queryParam("sessionId");
-  if (!publicCode && !existingSessionId) {
-    renderBinChooser();
-    return;
-  }
-  if (publicCode) {
-    backToBinLink.href = `../bins/detail.html?code=${encodeURIComponent(publicCode)}`;
-  }
+async function beginSessionForBin(publicCode) {
   try {
-    if (existingSessionId) {
-      const session = await getDepositSession(existingSessionId);
-      persistSessionUrl(session);
-      renderSession(session);
-      if (session.status === "ACTIVE") pollSession(session.sessionId);
-      return;
-    }
     const session = await startDepositSession(publicCode);
     persistSessionUrl(session);
     renderSession(session);
@@ -287,6 +350,33 @@ async function init() {
     renderError(message, { retryHref: `../bins/detail.html?code=${encodeURIComponent(publicCode)}` });
   }
 }
+
+async function init() {
+  const publicCode = queryParam("code");
+  const existingSessionId = queryParam("sessionId");
+  if (!publicCode && !existingSessionId) {
+    renderScanChooser();
+    return;
+  }
+  if (publicCode) {
+    backToBinLink.href = `../bins/detail.html?code=${encodeURIComponent(publicCode)}`;
+  }
+  if (existingSessionId) {
+    try {
+      const session = await getDepositSession(existingSessionId);
+      persistSessionUrl(session);
+      renderSession(session);
+      if (session.status === "ACTIVE") pollSession(session.sessionId);
+    } catch (error) {
+      const message = error instanceof ApiError ? error.message : "Could not start a deposit session for this bin.";
+      renderError(message, { retryHref: `../bins/detail.html?code=${encodeURIComponent(publicCode)}` });
+    }
+    return;
+  }
+  await beginSessionForBin(publicCode);
+}
+
+window.addEventListener("pagehide", stopCameraScan);
 
 init();
 injectSecretSortControls();
