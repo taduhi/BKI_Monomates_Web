@@ -469,7 +469,6 @@ function renderSession(session) {
     msg.textContent = scanRequested
       ? "The bin is checking the item. Keep it in place until the result appears."
       : "When the item is ready, press Scan item to start the bin's camera.";
-    timer.classList.remove("hidden");
     reward.classList.add("hidden");
     note.textContent = scanRequested
       ? "Waiting for the bin to return Accepted, Not accepted, or Invalid."
@@ -483,7 +482,16 @@ function renderSession(session) {
     line2m.textContent = scanRequested ? "Waiting for the bin" : "Press Scan item when ready";
     line3.textContent = "Deposit result";
     line3m.textContent = "Waiting for confirmation";
-    startCountdown(session.startedAt, session.expiresAt);
+    // The countdown only appears once the person has actually pressed Scan
+    // item — before that, the bin isn't watching yet, so showing a ticking
+    // clock would just be counting down time nothing is happening against.
+    if (scanRequested) {
+      timer.classList.remove("hidden");
+      startCountdown(session.startedAt, session.expiresAt);
+    } else {
+      timer.classList.add("hidden");
+      clearInterval(countdownInterval);
+    }
     return;
   }
 
