@@ -61,6 +61,11 @@ class AdminBinFlowTest {
         id
       );
       jdbc.update("delete from bin_accepted_items where bin_id = ?", id);
+      jdbc.update(
+        "delete from device_events where device_id in (select id from devices where bin_id = ?)",
+        id
+      );
+      jdbc.update("delete from devices where bin_id = ?", id);
       jdbc.update("delete from bins where id = ?", id);
       for (UUID locationId : locationIds) {
         jdbc.update("delete from locations where id = ?", locationId);
@@ -178,6 +183,64 @@ class AdminBinFlowTest {
 
     // Deletion already succeeded — nothing left for @AfterEach to clean up.
     createdBinIds.remove(id);
+  }
+
+  @Test
+  void creatingABinProvisionsADeviceSoTheSecretSortControlsWorkOnIt() throws Exception {
+    Cookie admin = adminAuth();
+    String code = "it-device-" + UUID.randomUUID().toString().substring(0, 8);
+    MvcResult created = createBin(admin, code);
+    UUID id = UUID.fromString(
+      json.readTree(created.getResponse().getContentAsString()).path("id").asText()
+    );
+    assertThat(jdbc.queryForObject("select count(*) from devices where bin_id = ?", Integer.class, id))
+      .as("a new bin must get a device automatically, or the demo secret-sort controls have nothing to act on")
+      .isEqualTo(1);
+
+    Cookie demo = mvc
+      .perform(
+        post("/api/v1/auth/login")
+          .with(csrf())
+          .contentType(MediaType.APPLICATION_JSON)
+          .content("{\"email\":\"demo@monomates.app\",\"password\":\"monomates1\"}")
+      )
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getCookie("mm_access_token");
+
+    MvcResult session = mvc
+      .perform(post("/api/v1/bins/{code}/sessions", code).with(csrf()).cookie(demo))
+      .andExpect(status().isOk())
+      .andReturn();
+    String sessionId = json
+      .readTree(session.getResponse().getContentAsString())
+      .path("sessionId")
+      .asText();
+
+    mvc
+      .perform(
+        post("/api/v1/demo/secret-sort")
+          .with(csrf())
+          .cookie(demo)
+          .contentType(MediaType.APPLICATION_JSON)
+          .content("{\"sessionId\":\"%s\",\"outcome\":\"ACCEPTED_PET\"}".formatted(sessionId))
+      )
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.tokensAwarded").value(2));
+
+    UUID deviceEventId = jdbc.queryForObject(
+      "select device_event_id from deposits where session_id = ?",
+      UUID.class,
+      UUID.fromString(sessionId)
+    );
+    jdbc.update(
+      "delete from token_ledger where deposit_id in (select id from deposits where session_id = ?)",
+      UUID.fromString(sessionId)
+    );
+    jdbc.update("delete from deposits where session_id = ?", UUID.fromString(sessionId));
+    jdbc.update("delete from device_events where id = ?", deviceEventId);
+    jdbc.update("delete from deposit_sessions where id = ?", UUID.fromString(sessionId));
   }
 
   @Test

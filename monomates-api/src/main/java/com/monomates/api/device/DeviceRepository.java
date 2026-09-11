@@ -11,4 +11,6 @@ public interface DeviceRepository extends JpaRepository<Device, UUID> {
   Optional<Device> findFirstByBin_Id(UUID binId);
 
   boolean existsByBin_Id(UUID binId);
+
+  void deleteByBin_Id(UUID binId);
 }

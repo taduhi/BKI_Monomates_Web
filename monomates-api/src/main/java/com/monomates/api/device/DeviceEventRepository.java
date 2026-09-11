@@ -10,4 +10,6 @@ public interface DeviceEventRepository
     UUID deviceId,
     String eventId
   );
+
+  boolean existsByDevice_Bin_Id(UUID binId);
 }
