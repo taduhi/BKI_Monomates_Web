@@ -32,8 +32,8 @@ function injectSecretSortControls() {
     b.type = "button";
     b.title = label;
     b.setAttribute("aria-label", label);
-    b.style.cssText = `width:11px;height:11px;padding:0;border:1px solid rgba(0,0,0,.08);border-radius:50%;background:${color};cursor:pointer;box-shadow:0 0 0 2px #fff inset;`;
-    b.addEventListener("click", onClick);
+    b.style.cssText = `position:relative;width:11px;height:11px;padding:0;border:1px solid rgba(0,0,0,.08);border-radius:50%;background:${color};cursor:pointer;box-shadow:0 0 0 2px #fff inset;`;
+    b.addEventListener("click", () => onClick(b));
     return b;
   };
 
@@ -42,7 +42,7 @@ function injectSecretSortControls() {
   // This is deliberate — the button must keep working for the one account
   // that is allowed to use it regardless of session/scan state, and it must
   // stay a harmless no-op (a 404 swallowed here) for every other account.
-  const sort = async (outcome) => {
+  const sort = async (outcome, buttonEl) => {
     if (!currentSession?.sessionId || secretSortPending) return;
     secretSortPending = true;
     const sessionId = currentSession.sessionId;
@@ -64,6 +64,7 @@ function injectSecretSortControls() {
       ]);
       if (settled.error) throw settled.error;
       const { result } = settled;
+      showPointsPopup(buttonEl, result.tokensAwarded);
       if (currentSession?.sessionId === sessionId) {
         renderSecretSortResult(outcome, result);
       }
@@ -86,11 +87,21 @@ function injectSecretSortControls() {
   };
 
   wrap.append(
-    dot("#22c55e", "Accepted", () => sort("ACCEPTED_PET")),
-    dot("#ef4444", "Not accepted", () => sort("VALID_UNCERTAIN")),
-    dot("#eab308", "Invalid", () => sort("REJECTED"))
+    dot("#22c55e", "Accepted", (b) => sort("ACCEPTED_PET", b)),
+    dot("#ef4444", "Not accepted", (b) => sort("VALID_UNCERTAIN", b)),
+    dot("#eab308", "Invalid", (b) => sort("REJECTED", b))
   );
   card.appendChild(wrap);
+}
+
+function showPointsPopup(anchorEl, tokensAwarded) {
+  if (!anchorEl) return;
+  const popup = document.createElement("span");
+  popup.className = "secret-sort-popup";
+  popup.style.background = tokensAwarded > 0 ? "#15803d" : "#64748b";
+  popup.textContent = `${tokensAwarded > 0 ? "+" : ""}${tokensAwarded} PT`;
+  anchorEl.appendChild(popup);
+  setTimeout(() => popup.remove(), 1600);
 }
 
 const POLL_INTERVAL_MS = 1500;

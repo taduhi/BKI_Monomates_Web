@@ -92,6 +92,45 @@
     }
 }
 
+.secret-sort-popup {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 6px;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .18);
+    pointer-events: none;
+    animation: secret-sort-pop 1.6s ease forwards
+}
+
+@keyframes secret-sort-pop {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(4px)
+    }
+
+    15% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0)
+    }
+
+    75% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-2px)
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px)
+    }
+}
+
 @media(min-width:850px) {
     .sessiongrid {
         grid-template-columns: 1.4fr .7fr
