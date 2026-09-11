@@ -112,9 +112,16 @@ function applyFilters() {
 }
 window.fb = applyFilters;
 
+function nearbyBinsPreferenceEnabled() {
+  // Mirrors the same-keyed toggle on the profile page (default on, matching
+  // its "aria-pressed" default there) so "Nearby bin suggestions" actually
+  // controls this sort instead of being a no-op switch.
+  return localStorage.getItem("monomates:preference:nearbyBins") !== "false";
+}
+
 function renderBins() {
   const bins = [...allBins].sort((left, right) => {
-    if (!currentPosition) return left.name.localeCompare(right.name);
+    if (!currentPosition || !nearbyBinsPreferenceEnabled()) return left.name.localeCompare(right.name);
     return distanceForBin(left) - distanceForBin(right);
   });
   bl.innerHTML = "";
@@ -172,8 +179,17 @@ async function loadBalance() {
     const balance = await getTokenBalance();
     binsBalanceValue.textContent = `${balance.balance} PT`;
     binsBalanceCard.classList.remove("hidden");
-  } catch {
-    binsBalanceCard.classList.add("hidden");
+  } catch (error) {
+    // A 401 means the session ended and the auth guard is already
+    // redirecting to login — hiding the card avoids a flash of a stale
+    // value. Any other failure is unrelated to login state, so still show
+    // the card with a placeholder instead of making the balance vanish.
+    if (error instanceof ApiError && error.status === 401) {
+      binsBalanceCard.classList.add("hidden");
+    } else {
+      binsBalanceValue.textContent = "— PT";
+      binsBalanceCard.classList.remove("hidden");
+    }
   }
 }
 

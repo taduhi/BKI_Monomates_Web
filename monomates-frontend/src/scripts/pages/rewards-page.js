@@ -2,6 +2,7 @@ import { requireAuthentication } from "../guards/auth-guard.js";
 import { getVouchers, redeemVoucher, getTokenBalance, getRedemptions } from "../api/rewards-api.js";
 import { ApiError } from "../api/api-client.js";
 import { renderTokenBalancePill } from "../components/token-balance.js";
+import { lockModal, unlockModal } from "../components/modal.js";
 import { setLoading } from "../components/loading.js";
 import { escapeHtml } from "../utils/dom.js";
 import { formatDateTime } from "../utils/date.js";
@@ -87,6 +88,10 @@ function openRedemption(voucher) {
 async function handleConfirmRedeem() {
   const button = document.getElementById("confirm-redemption");
   setLoading(button, true, "Redeeming…");
+  // A voucher redemption deducts real tokens the moment the request
+  // succeeds; lock the modal so Escape/backdrop-click can't dismiss it
+  // (and silently hide the one-time redemption code) while it's in flight.
+  lockModal("redeem");
   try {
     const redemption = await redeemVoucher(selectedVoucher.id);
     confirm.style.display = "none";
@@ -102,6 +107,8 @@ async function handleConfirmRedeem() {
     const message = error instanceof ApiError ? error.message : "Could not redeem this voucher.";
     window.toast?.(message, "error");
     setLoading(button, false);
+  } finally {
+    unlockModal("redeem");
   }
 }
 window.redeem = openRedemption;

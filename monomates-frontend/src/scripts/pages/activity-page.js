@@ -41,16 +41,20 @@ function buildDepositActivity(deposit, ledgerEntries) {
         <strong>Not awarded</strong>
       </div>
     `;
+  const title = depositTitle(deposit.status);
+  const binLabel = deposit.binName ?? deposit.binCode;
 
   return {
     date: deposit.verifiedAt,
+    direction: tokens > 0 ? "earned" : "neutral",
+    searchKey: `${title} ${binLabel}`.toLowerCase(),
     html: `
       <article class="card activity">
         <div class="amain" onclick="this.parentElement.classList.toggle('open')">
           <span class="aicon">${DEPOSIT_ICON}</span>
           <div>
-            <b>${escapeHtml(depositTitle(deposit.status))}</b>
-            <div class="small muted">${escapeHtml(deposit.binName ?? deposit.binCode)} · ${formatDateTime(deposit.verifiedAt)}</div>
+            <b>${escapeHtml(title)}</b>
+            <div class="small muted">${escapeHtml(binLabel)} · ${formatDateTime(deposit.verifiedAt)}</div>
           </div>
           <div class="amount" style="${tokens > 0 ? "color:#15803d" : ""}">${tokens > 0 ? "+" : ""}${tokens} PT</div>
         </div>
@@ -63,14 +67,18 @@ function buildDepositActivity(deposit, ledgerEntries) {
 }
 
 function buildRedemptionActivity(entry) {
+  const title = `Redeemed ${entry.voucherTitle ?? "voucher"}`;
+
   return {
     date: entry.createdAt,
+    direction: "spent",
+    searchKey: title.toLowerCase(),
     html: `
       <article class="card activity">
         <div class="amain" onclick="this.parentElement.classList.toggle('open')">
           <span class="aicon" style="background:#eff6ff;color:var(--primary)">${REDEMPTION_ICON}</span>
           <div>
-            <b>Redeemed ${escapeHtml(entry.voucherTitle ?? "voucher")}</b>
+            <b>${escapeHtml(title)}</b>
             <div class="small muted">${formatDateTime(entry.createdAt)}</div>
           </div>
           <div class="amount">${entry.amount} PT</div>
@@ -91,6 +99,26 @@ function buildRedemptionActivity(entry) {
 function renderEmpty(message) {
   alist.innerHTML = `<div class="card empty"><p class="muted">${escapeHtml(message)}</p></div>`;
 }
+
+let allItems = [];
+
+function filterActivity() {
+  if (allItems.length === 0) return;
+  const query = aq.value.trim().toLowerCase();
+  const direction = atype.value;
+  const sorted = asort.value === "oldest" ? [...allItems].reverse() : allItems;
+  const visible = sorted.filter(
+    (item) =>
+      item.searchKey.includes(query) &&
+      (direction === "all" || item.direction === direction)
+  );
+  if (visible.length === 0) {
+    renderEmpty("No activity matches your filters.");
+    return;
+  }
+  alist.innerHTML = visible.map((item) => item.html).join("");
+}
+window.fa = filterActivity;
 
 async function load() {
   try {
@@ -120,16 +148,16 @@ async function load() {
       ledgerByDeposit.get(entry.depositId).push(entry);
     }
 
-    const items = [
+    allItems = [
       ...deposits.map((d) => buildDepositActivity(d, ledgerByDeposit.get(d.id) ?? [])),
       ...ledger.filter((e) => e.type === "REDEMPTION").map(buildRedemptionActivity)
     ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    if (items.length === 0) {
+    if (allItems.length === 0) {
       renderEmpty("No activity yet. Scan a bin to make your first deposit.");
       return;
     }
-    alist.innerHTML = items.map((item) => item.html).join("");
+    filterActivity();
   } catch (error) {
     const message = error instanceof ApiError ? error.message : "Could not load your activity.";
     renderEmpty(message);

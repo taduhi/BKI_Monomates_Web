@@ -214,22 +214,25 @@
 <path d="m21 21-4.3-4.3">
 </path>
 </svg>
-<input class="input hasicon" placeholder="Search activity"/>
+<input class="input hasicon" id="aq" oninput="fa()" placeholder="Search activity"/>
 </div>
-<select class="select">
-<option>
+<select class="select" id="atype" onchange="fa()">
+<option value="all">
         All activity
        </option>
-<option>
+<option value="earned">
         Earned
        </option>
-<option>
+<option value="spent">
         Spent
        </option>
 </select>
-<select class="select">
-<option>
+<select class="select" id="asort" onchange="fa()">
+<option value="newest">
         Newest first
+       </option>
+<option value="oldest">
+        Oldest first
        </option>
 </select>
 </section>

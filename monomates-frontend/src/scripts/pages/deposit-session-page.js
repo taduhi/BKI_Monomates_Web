@@ -235,7 +235,8 @@ async function pollSession(sessionId, generation = pollGeneration) {
   } catch (error) {
     if (generation !== pollGeneration) return;
     const message = error instanceof ApiError ? error.message : "Lost connection to this session. Please refresh the page.";
-    renderError(message);
+    const binCode = currentSession?.binCode;
+    renderError(message, binCode ? { retryHref: `../bins/detail.html?code=${encodeURIComponent(binCode)}` } : {});
   }
 }
 
