@@ -92,11 +92,9 @@ function renderBin(bin) {
   renderBinQr(bin);
 }
 
-// Per BKI_Monomates_web.md section 26: the prototype does not build an
-// in-app camera scanner — a phone's own camera app reads a printed QR code
-// that encodes a URL, and the browser opens it directly. This renders that
-// real, scannable QR (pointing at the exact same session URL the "Scan QR"
-// button already uses) so it can be printed and stuck on the physical bin.
+// Render the canonical MonoMates URL for this bin. Both a phone's native QR
+// reader and the in-app scanner can read it; the in-app scanner also supports
+// a plain public code and the legacy `qrCodeId` query parameter.
 function renderBinQr(bin) {
   if (bin.status !== "ACTIVE") {
     qrCard.classList.add("hidden");

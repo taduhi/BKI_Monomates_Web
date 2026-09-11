@@ -62,6 +62,30 @@
     gap: 13px
 }
 
+.scan-result {
+    display: grid;
+    gap: 12px
+}
+
+.scan-result__row {
+    display: grid;
+    gap: 4px
+}
+
+.scan-result__row>span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase
+}
+
+.scan-result code {
+    display: block;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap
+}
+
 @keyframes spin {
     to {
         transform: rotate(360deg)

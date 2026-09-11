@@ -1,9 +1,10 @@
 import jsQR from "jsqr";
 import { requireAuthentication } from "../guards/auth-guard.js";
-import { startDepositSession } from "../api/bins-api.js";
+import { getBins, startDepositSession } from "../api/bins-api.js";
 import { getDepositSession, cancelDepositSession, secretSort } from "../api/deposit-api.js";
 import { ApiError } from "../api/api-client.js";
 import { queryParam, escapeHtml } from "../utils/dom.js";
+import { findBinForQrPayload, parseQrPayload } from "../utils/qr-code.js";
 import { renderTokenBalancePill } from "../components/token-balance.js";
 
 await requireAuthentication();
@@ -159,48 +160,122 @@ async function startCameraScan() {
       canvasContext.drawImage(scanVideo, 0, 0, scanCanvas.width, scanCanvas.height);
       const frame = canvasContext.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
       const result = jsQR(frame.data, frame.width, frame.height);
-      const publicCode = result?.data ? extractBinCode(result.data) : null;
-      if (publicCode) {
+      if (result?.data) {
         // Freeze on the exact frame the code was decoded from — a still,
-        // visible capture the person can see matched, not an instant cut
-        // to the next screen — before releasing the camera and matching
-        // the decoded string against the bin's real records.
+        // visible capture the person can see matched — before releasing the
+        // camera and comparing the decoded payload with the real bin list.
         scanVideo.pause();
-        badge.className = "badge green";
+        badge.className = "badge blue";
         badge.textContent = "QR captured";
-        title.textContent = "Matching this code to a bin…";
-        msg.textContent = `Captured code: ${publicCode}`;
+        title.textContent = "Reading the QR content…";
+        msg.textContent = "The QR code was decoded. Matching it to a MonoMates bin…";
         note.textContent = "Checking this bin's records…";
         actions.innerHTML = "";
-        setTimeout(() => {
-          stopCameraScan();
-          const url = new URL(window.location.href);
-          url.searchParams.set("code", publicCode);
-          url.searchParams.delete("sessionId");
-          window.history.replaceState(null, "", url);
-          backToBinLink.href = `../bins/detail.html?code=${encodeURIComponent(publicCode)}`;
-          beginSessionForBin(publicCode);
-        }, 600);
+        showDecodedQrResult(result.data);
         return;
       }
-      // A QR code was found but it isn't a MonoMates bin URL (or no code was
-      // found at all this frame) — keep scanning instead of giving up.
-      note.textContent = result?.data
-        ? "That QR code isn't a MonoMates bin — still looking…"
-        : "Looking for a QR code…";
+      note.textContent = "Looking for a QR code…";
     }
     scanAnimationFrameId = requestAnimationFrame(scanFrame);
   };
   scanAnimationFrameId = requestAnimationFrame(scanFrame);
 }
 
-function extractBinCode(text) {
+async function showDecodedQrResult(decodedText) {
+  const payload = parseQrPayload(decodedText);
   try {
-    const url = new URL(text);
-    return url.searchParams.get("code");
-  } catch {
-    return null;
+    const bins = await getBins();
+    const bin = findBinForQrPayload(bins, payload);
+    stopCameraScan();
+    renderDecodedQrResult(payload, bin);
+  } catch (error) {
+    stopCameraScan();
+    const message = error instanceof ApiError
+      ? error.message
+      : "Could not check the decoded QR against the bin list.";
+    renderScanChooser(message);
   }
+}
+
+function renderDecodedQrResult(payload, bin) {
+  const candidate = payload.candidates[0] ?? "—";
+  const isAvailable = bin?.status === "ACTIVE";
+
+  vis.className = `visual ${bin ? "success" : "partial"}`;
+  vis.innerHTML = bin ? ICONS.success : ICONS.fail;
+  badge.className = `badge ${bin ? "green" : "orange"}`;
+  badge.textContent = bin ? "Bin matched" : "QR decoded";
+  title.textContent = bin ? "MonoMates bin found" : "No matching bin found";
+  msg.textContent = bin
+    ? "The decoded value matches a bin currently registered in MonoMates."
+    : "The camera read this QR, but its value does not match any registered bin.";
+  timer.classList.add("hidden");
+  reward.classList.add("hidden");
+
+  note.innerHTML = `
+    <div class="scan-result" aria-live="polite">
+      <div class="scan-result__row">
+        <span>Decoded text</span>
+        <code>${escapeHtml(payload.text)}</code>
+      </div>
+      <div class="scan-result__row">
+        <span>Compared value</span>
+        <code>${escapeHtml(candidate)}</code>
+      </div>
+      ${bin ? `
+        <div class="scan-result__row">
+          <span>Bin QR ID</span>
+          <strong>${escapeHtml(bin.publicCode)}</strong>
+        </div>
+        <div class="scan-result__row">
+          <span>Bin record ID</span>
+          <code>${escapeHtml(bin.id)}</code>
+        </div>
+        <div class="scan-result__row">
+          <span>Bin</span>
+          <strong>${escapeHtml(bin.name)} · ${escapeHtml(bin.status)}</strong>
+        </div>
+      ` : `
+        <div class="scan-result__row">
+          <span>Match result</span>
+          <strong>Not found in the current bin list</strong>
+        </div>
+      `}
+    </div>
+  `;
+
+  if (bin) {
+    backToBinLink.href = `../bins/detail.html?code=${encodeURIComponent(bin.publicCode)}`;
+    actions.innerHTML = isAvailable
+      ? '<button class="btn" id="useScannedBinBtn" type="button">Continue with this bin</button><button class="btn2" id="scanAgainBtn" type="button">Scan again</button>'
+      : '<a class="btn" id="viewScannedBinLink">View bin details</a><button class="btn2" id="scanAgainBtn" type="button">Scan again</button>';
+    if (isAvailable) {
+      document.getElementById("useScannedBinBtn").addEventListener("click", () => {
+        const url = new URL(window.location.href);
+        url.searchParams.set("code", bin.publicCode);
+        url.searchParams.delete("sessionId");
+        window.history.replaceState(null, "", url);
+        beginSessionForBin(bin.publicCode);
+      });
+    } else {
+      const link = document.getElementById("viewScannedBinLink");
+      link.href = `../bins/detail.html?code=${encodeURIComponent(bin.publicCode)}`;
+    }
+  } else {
+    actions.innerHTML = '<button class="btn" id="scanAgainBtn" type="button">Scan again</button><a class="btn2" href="../bins/index.html">Browse available bins</a>';
+  }
+  document.getElementById("scanAgainBtn").addEventListener("click", startCameraScan);
+
+  line1.textContent = "QR decoded";
+  line1m.textContent = payload.text;
+  line2.textContent = bin ? "Bin matched" : "No bin match";
+  line2m.textContent = bin ? bin.publicCode : "Try another QR code";
+  line3.textContent = isAvailable ? "Ready to continue" : "Session not started";
+  line3m.textContent = isAvailable
+    ? "Confirm the matched bin first"
+    : bin
+      ? `Bin status: ${bin.status}`
+      : "No registered bin was selected";
 }
 
 function startCountdown(startedAtIso, expiresAtIso) {
