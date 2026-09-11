@@ -25,6 +25,15 @@ function typeMeta(type) {
   return TYPE_META[type] ?? { label: type, badgeClass: "gray" };
 }
 
+function readableValue(value) {
+  if (!value) return "—";
+  return String(value)
+    .toLowerCase()
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 function applyFilters() {
   const query = txSearch.value.trim().toLowerCase();
   const type = txType.value;
@@ -71,8 +80,8 @@ function showDetail(entry) {
     ["User", entry.userFullName ? `${entry.userFullName} (${entry.userEmail})` : entry.userEmail ?? "—"],
     ["Bin", entry.binCode ?? "—"],
     ["Deposit session", entry.depositSessionId ?? "—"],
-    ["Verification method", entry.verificationMethod ?? "—"],
-    ["Verification status", entry.verificationStatus ?? "—"],
+    ["Verification method", readableValue(entry.verificationMethod)],
+    ["Verification status", readableValue(entry.verificationStatus)],
     ["Voucher", entry.voucherTitle ?? "—"],
     ["Date", formatDateTime(entry.createdAt)],
     ["Entry ID", entry.id]

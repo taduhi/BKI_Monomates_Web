@@ -1,4 +1,4 @@
-seed_key	partner_name	title	description	token_cost	inventory	valid_from_days_ago	valid_until_days_ahead	status	image_url
-COFFEE	HCMUT Campus Cafe (Demo)	Coffee voucher	One regular hot or iced coffee. Synthetic proposal reward; not valid for real payment.	20	100	30	365	ACTIVE	
-BUS	HCMC Bus Partner (Demo)	Bus fare voucher	A synthetic public-transport reward for the MonoMates prototype.	25	80	30	365	ACTIVE	
-MARKET	Eco Market Partner (Demo)	Eco market voucher	A synthetic shopping reward for reusable or low-waste goods.	50	40	30	365	ACTIVE	
+seed_key	partner_name	title	description	token_cost	inventory	valid_from_days_ago	valid_until_days_ahead	status
+COFFEE	HCMUT Campus Cafe	Coffee voucher	One regular hot or iced coffee at a participating campus cafe.	20	100	30	365	ACTIVE
+BUS	HCMC Bus	Bus fare voucher	Redeem this reward for one eligible public-transport fare.	25	80	30	365	ACTIVE
+MARKET	Eco Market	Eco market voucher	Use this reward toward reusable or low-waste goods.	50	40	30	365	ACTIVE

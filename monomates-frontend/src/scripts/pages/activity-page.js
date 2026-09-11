@@ -33,11 +33,11 @@ function buildDepositActivity(deposit, ledgerEntries) {
     .join("") ||
     `
       <div class="drow">
-        <span>Camera result</span>
-        <strong>${deposit.status === "ACCEPTED" ? "Accepted" : deposit.status === "VALID_UNCLASSIFIED" ? "Uncertain" : "Rejected"}</strong>
+        <span>Item check</span>
+        <strong>${deposit.status === "ACCEPTED" ? "Accepted" : deposit.status === "VALID_UNCLASSIFIED" ? "Accepted without bottle bonus" : "Not accepted"}</strong>
       </div>
       <div class="drow">
-        <span>Extra token</span>
+        <span>Bottle bonus</span>
         <strong>Not awarded</strong>
       </div>
     `;

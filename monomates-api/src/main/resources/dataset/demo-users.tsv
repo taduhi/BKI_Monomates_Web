@@ -1,8 +1,8 @@
 email	password	full_name	role	status	starting_tokens
-user@monomates.local	User123!	MonoMates Demo User	USER	ACTIVE	25
-demo@monomates.app	monomates1	MonoMates Secret Controls Demo	USER	ACTIVE	0
+user@monomates.local	User123!	MonoMates Member	USER	ACTIVE	25
+demo@monomates.app	monomates1	MonoMates Demo	USER	ACTIVE	0
 admin@monomates.local	Admin123!	MonoMates Administrator	ADMIN	ACTIVE	0
-operator@monomates.local	Operator123!	Bin Operations Demo	OPERATOR	ACTIVE	0
-linh.demo@monomates.local	Demo123!	Nguyen Minh Linh (Demo)	USER	ACTIVE	30
-nam.demo@monomates.local	Demo123!	Tran Hoang Nam (Demo)	USER	ACTIVE	20
-mai.demo@monomates.local	Demo123!	Le Thanh Mai (Demo)	USER	ACTIVE	40
+operator@monomates.local	Operator123!	Bin Operations	OPERATOR	ACTIVE	0
+linh.demo@monomates.local	Demo123!	Nguyen Minh Linh	USER	ACTIVE	30
+nam.demo@monomates.local	Demo123!	Tran Hoang Nam	USER	ACTIVE	20
+mai.demo@monomates.local	Demo123!	Le Thanh Mai	USER	ACTIVE	40
