@@ -43,7 +43,15 @@ function injectSecretSortControls() {
   // that is allowed to use it regardless of session/scan state, and it must
   // stay a harmless no-op (a 404 swallowed here) for every other account.
   const sort = async (outcome) => {
-    if (!currentSession?.sessionId) return;
+    if (!currentSession?.sessionId) {
+      // No API call happens without a session id, so nothing here can leak
+      // account identity — every account sees this exact message in this
+      // exact circumstance. Without it, clicking before a session exists
+      // (e.g. still on the "choose a bin" or "scanning" screen, where these
+      // dots are also rendered) looked identical to the button being dead.
+      window.toast?.("Start a deposit session before using this.", "error");
+      return;
+    }
     const sessionId = currentSession.sessionId;
     try {
       await secretSort(sessionId, outcome);
