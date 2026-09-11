@@ -525,7 +525,11 @@ function renderSession(session) {
       breakdown.innerHTML = '<div class="drow"><span>Accepted clear bottle</span><strong>Not confirmed</strong></div>';
     }
     note.textContent = "This result has been recorded to your activity.";
-    actions.innerHTML = '<a class="btn" href="../activity/index.html">View activity</a><a class="btn2" href="../bins/index.html">Find another bin</a>';
+    actions.innerHTML =
+      '<button class="btn" id="scanNextItemBtn" type="button">Scan item</button>' +
+      '<a class="btn2" href="../activity/index.html">View activity</a>' +
+      '<a class="btn2" href="../bins/index.html">Find another bin</a>';
+    document.getElementById("scanNextItemBtn").addEventListener("click", retryCurrentBin);
     line3.textContent = `${tokens} PT awarded`;
     line3m.textContent = "Reward added to balance";
     if (tokens > 0) renderTokenBalancePill();
@@ -548,7 +552,7 @@ function renderSession(session) {
     title.textContent = "Not accepted";
     msg.textContent = "The bin could not confirm a valid deposit. No token was awarded.";
     note.textContent = "A QR scan alone is never enough to earn a reward.";
-    renderSameBinRetryActions();
+    renderSameBinRetryActions("Scan item");
     line3.textContent = "0 PT awarded";
     line3m.textContent = "No reward was added";
   } else if (session.status === "CANCELLED") {
