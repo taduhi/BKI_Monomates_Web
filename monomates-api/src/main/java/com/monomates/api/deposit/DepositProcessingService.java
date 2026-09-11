@@ -161,9 +161,6 @@ public class DepositProcessingService {
     if (s.getStatus() != SessionStatus.ACTIVE) throw new BusinessRuleException(
       "The deposit session is not active."
     );
-    if (s.getScanRequestedAt() == null) throw new BusinessRuleException(
-      "No item scan has been requested for this session."
-    );
     DeviceEvent e = events.save(
       new DeviceEvent(
         device,

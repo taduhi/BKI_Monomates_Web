@@ -123,11 +123,7 @@ class DeviceDepositEventFlowTest {
       .perform(post("/api/v1/bins/{code}/sessions", binCode).with(csrf()).cookie(auth))
       .andExpect(status().isOk())
       .andReturn();
-    String sessionId = field(result, "sessionId");
-    mvc
-      .perform(post("/api/v1/sessions/{id}/scan", sessionId).with(csrf()).cookie(auth))
-      .andExpect(status().isOk());
-    return sessionId;
+    return field(result, "sessionId");
   }
 
   private String field(MvcResult result, String name) throws Exception {
@@ -243,30 +239,6 @@ class DeviceDepositEventFlowTest {
       .andReturn();
 
     assertThat(result.getResponse().getStatus()).isEqualTo(404);
-  }
-
-  @Test
-  void anEventIsRejectedUntilTheUserRequestsAnItemScan() throws Exception {
-    Cookie auth = registerUser();
-    MvcResult started = mvc
-      .perform(post("/api/v1/bins/{code}/sessions", ACTIVE_BIN).with(csrf()).cookie(auth))
-      .andExpect(status().isOk())
-      .andReturn();
-    String sessionId = field(started, "sessionId");
-
-    MvcResult result = submitEvent(
-      DEVICE_CODE,
-      DEVICE_SECRET,
-      "evt-" + UUID.randomUUID(),
-      sessionId,
-      true,
-      "24.0",
-      "CLEAR_PET_BOTTLE",
-      "0.95"
-    );
-
-    assertThat(result.getResponse().getStatus()).isEqualTo(422);
-    assertThat(field(result, "message")).contains("No item scan has been requested");
   }
 
   @Test

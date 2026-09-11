@@ -43,8 +43,6 @@ class DepositSessionFlowTest {
   private static final String ACTIVE_BIN = "BIN-HCMUT-001";
   private static final String SECOND_ACTIVE_BIN = "BIN-YOUTH-001";
   private static final String MAINTENANCE_BIN = "BIN-D10-001";
-  private static final String DEVICE_CODE = "DEV-HCMUT-001";
-  private static final String DEVICE_SECRET = "demo-device-secret-hcmut";
 
   @Autowired
   private WebApplicationContext context;
@@ -137,19 +135,11 @@ class DepositSessionFlowTest {
   }
 
   @Test
-  void itemScanRequestIsOwnedIdempotentAndReturnedToTheBinsDevice() throws Exception {
+  void itemScanRequestIsOwnedAndIdempotent() throws Exception {
     Cookie owner = registerUser();
     Cookie stranger = registerUser();
     MvcResult started = startSession(owner, ACTIVE_BIN);
     String sessionId = field(started, "sessionId");
-
-    String heartbeatBody = """
-      {"deviceCode":"%s","deviceSecret":"%s","firmwareVersion":"test"}
-      """.formatted(DEVICE_CODE, DEVICE_SECRET);
-    mvc
-      .perform(post("/api/v1/device/heartbeat").contentType(MediaType.APPLICATION_JSON).content(heartbeatBody))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.command").value("IDLE"));
 
     mvc
       .perform(post("/api/v1/sessions/{id}/scan", sessionId).with(csrf()).cookie(stranger))
@@ -172,12 +162,6 @@ class DepositSessionFlowTest {
       Instant.parse(field(repeated, "scanRequestedAt"))
     ).abs();
     assertThat(timestampDifference).isLessThanOrEqualTo(Duration.ofNanos(1_000));
-
-    mvc
-      .perform(post("/api/v1/device/heartbeat").contentType(MediaType.APPLICATION_JSON).content(heartbeatBody))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.command").value("SCAN_ITEM"))
-      .andExpect(jsonPath("$.sessionId").value(sessionId));
 
     cancelSession(owner, sessionId);
     mvc
