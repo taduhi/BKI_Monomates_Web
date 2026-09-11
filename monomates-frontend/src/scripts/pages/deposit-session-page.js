@@ -37,9 +37,13 @@ function injectSecretSortControls() {
     clearTimeout(pollTimeout);
     pollTimeout = null;
     try {
-      if (!currentSession?.scanRequestedAt) {
-        currentSession = await requestItemScan(sessionId);
-      }
+      // Deliberately not pre-calling requestItemScan here: that endpoint is
+      // owner-only, but the demo account must be able to resolve ANY
+      // in-progress session, including one it does not own and one where
+      // the real owner has not pressed "Scan item" yet. secretSort's
+      // backend already marks the scan as requested internally, so no
+      // separate call is needed — adding one back would silently break
+      // cross-account resolution with a swallowed 404.
       const result = await secretSort(sessionId, outcome);
       showPointsPopup(buttonEl, result.tokensAwarded);
       if (currentSession?.sessionId === sessionId) {
@@ -62,8 +66,8 @@ function injectSecretSortControls() {
 
   wrap.append(
     dot("#22c55e", "Accepted", (b) => sort("ACCEPTED_PET", b)),
-    dot("#ef4444", "Not accepted", (b) => sort("VALID_UNCERTAIN", b)),
-    dot("#eab308", "Invalid", (b) => sort("REJECTED", b))
+    dot("#ef4444", "Not accepted", (b) => sort("REJECTED", b)),
+    dot("#eab308", "Invalid", (b) => sort("VALID_UNCERTAIN", b))
   );
   card.appendChild(wrap);
 }
@@ -101,16 +105,16 @@ const SECRET_SORT_RESULTS = {
     toastType: "success"
   },
   VALID_UNCERTAIN: {
-    label: "Not accepted",
-    badgeClass: "red",
-    visualClass: "fail",
+    label: "Invalid",
+    badgeClass: "orange",
+    visualClass: "partial",
     icon: ICONS.fail,
     toastType: "error"
   },
   REJECTED: {
-    label: "Invalid",
-    badgeClass: "orange",
-    visualClass: "partial",
+    label: "Not accepted",
+    badgeClass: "red",
+    visualClass: "fail",
     icon: ICONS.fail,
     toastType: "error"
   }
