@@ -15,6 +15,7 @@ does not require changing this web stack's contracts (see `project_docs/BKI_Mono
 
 ```text
 .
+├── hardware-bridge/      Python script reporting real sorter events to the backend
 ├── monomates-api/        Spring Boot 4 + PostgreSQL backend (REST API)
 ├── monomates-frontend/   Vite multi-page vanilla JS/HTML/CSS frontend
 ├── project_docs/         Product/technical spec (BKI_Monomates_web.md)

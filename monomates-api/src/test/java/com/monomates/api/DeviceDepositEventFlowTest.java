@@ -192,6 +192,56 @@ class DeviceDepositEventFlowTest {
   }
 
   @Test
+  void anEventWithoutASessionIdIsLinkedToTheBinsActiveSession() throws Exception {
+    // Real bin hardware never learns a session id — only the user's own
+    // phone/browser does. It identifies itself by device/bin only, and the
+    // backend must find whichever session is currently ACTIVE for that bin.
+    Cookie auth = registerUser();
+    startSession(auth, ACTIVE_BIN);
+
+    String body = """
+      {
+        "deviceCode": "%s",
+        "deviceSecret": "%s",
+        "eventId": "evt-%s",
+        "irDetected": true,
+        "weightChangeGrams": 24.0,
+        "itemType": "CLEAR_PET_BOTTLE",
+        "classificationConfidence": 0.95
+      }
+      """.formatted(DEVICE_CODE, DEVICE_SECRET, UUID.randomUUID());
+
+    MvcResult result = mvc
+      .perform(post("/api/v1/device/events/deposit").contentType(MediaType.APPLICATION_JSON).content(body))
+      .andReturn();
+
+    assertThat(result.getResponse().getStatus()).isEqualTo(200);
+    assertThat(field(result, "status")).isEqualTo("ACCEPTED");
+    assertThat(intField(result, "tokensAwarded")).isEqualTo(2);
+  }
+
+  @Test
+  void anEventWithoutASessionIdIsRejectedWhenTheBinHasNoActiveSession() throws Exception {
+    String body = """
+      {
+        "deviceCode": "%s",
+        "deviceSecret": "%s",
+        "eventId": "evt-%s",
+        "irDetected": true,
+        "weightChangeGrams": 24.0,
+        "itemType": "CLEAR_PET_BOTTLE",
+        "classificationConfidence": 0.95
+      }
+      """.formatted(DEVICE_CODE, DEVICE_SECRET, UUID.randomUUID());
+
+    MvcResult result = mvc
+      .perform(post("/api/v1/device/events/deposit").contentType(MediaType.APPLICATION_JSON).content(body))
+      .andReturn();
+
+    assertThat(result.getResponse().getStatus()).isEqualTo(404);
+  }
+
+  @Test
   void validButUnclassifiedDepositEarnsOneToken() throws Exception {
     Cookie auth = registerUser();
     String sessionId = startSession(auth, ACTIVE_BIN);

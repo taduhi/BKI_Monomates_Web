@@ -13,6 +13,9 @@ See `README.md` for what each top-level folder is for.
 
 ```text
 .
+├── hardware-bridge/
+│   ├── README.md
+│   └── send_deposit_event.py
 ├── monomates-api/
 │   ├── dataset/
 │   │   └── templates/

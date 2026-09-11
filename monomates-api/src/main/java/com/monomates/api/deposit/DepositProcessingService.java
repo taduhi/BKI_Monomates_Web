@@ -125,11 +125,7 @@ public class DepositProcessingService {
    * idempotent instead of failing with "session is not active".
    */
   private DepositResponse internal(Device device, DeviceDepositEventRequest r) {
-    DepositSession s = sessions
-      .findByIdForUpdate(r.sessionId())
-      .orElseThrow(() ->
-        new NotFoundException("Deposit session was not found.")
-      );
+    DepositSession s = resolveSession(device, r.sessionId());
 
     Optional<DeviceEvent> dup = events.findByDevice_IdAndExternalEventId(
       device.getId(),
@@ -143,7 +139,7 @@ public class DepositProcessingService {
             "This event has already been received and is still being processed."
           )
         );
-      if (!d.getSession().getId().equals(r.sessionId())) {
+      if (!d.getSession().getId().equals(s.getId())) {
         throw new ConflictException(
           "This event ID is already linked to another deposit session."
         );
@@ -222,6 +218,29 @@ public class DepositProcessingService {
       e.markRejected();
     }
     return DepositResponse.from(d, tokens);
+  }
+
+  /**
+   * A browser-driven caller (the demo/testing endpoints) already knows the
+   * session it started and passes its id directly. Real bin hardware never
+   * learns a session id at all — only the user's own phone/browser does —
+   * so per the original hardware-integration design it identifies itself by
+   * device/bin only, and this finds whichever session is currently ACTIVE
+   * for that bin instead.
+   */
+  private DepositSession resolveSession(Device device, UUID sessionId) {
+    if (sessionId != null) {
+      return sessions
+        .findByIdForUpdate(sessionId)
+        .orElseThrow(() ->
+          new NotFoundException("Deposit session was not found.")
+        );
+    }
+    return sessions
+      .findByBin_IdAndStatus(device.getBin().getId(), SessionStatus.ACTIVE)
+      .orElseThrow(() ->
+        new NotFoundException("No active deposit session for this bin.")
+      );
   }
 
   private AcceptedItemType accepted(Device d, String code) {

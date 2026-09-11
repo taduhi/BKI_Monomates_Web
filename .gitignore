@@ -14,3 +14,8 @@ project_docs/implementation_plan.md
 project_docs/repository_audit.md
 project_docs/qa_testing_brief.md
 
+# Hardware/firmware repo, kept locally for reference only — separate git
+# history/owner, never to be tracked, committed, or modified by this repo or
+# by an AI agent working in this repo. Read-only reference material.
+BKI-arduino_app/
+
