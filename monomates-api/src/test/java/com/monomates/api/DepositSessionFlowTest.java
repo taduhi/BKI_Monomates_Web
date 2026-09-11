@@ -335,7 +335,20 @@ class DepositSessionFlowTest {
       assertThat(field(resultA, "sessionId"))
         .as("two 200s on the same bin must be the same session, never two different ones")
         .isEqualTo(field(resultB, "sessionId"));
-      cancelSession(userA, field(resultA, "sessionId"));
+      // Whichever of A/B actually won the race to create the row owns it —
+      // that is a timing accident too, so try both rather than assuming A.
+      String sessionId = field(resultA, "sessionId");
+      int cancelStatusA = mvc
+        .perform(post("/api/v1/sessions/{id}/cancel", sessionId).with(csrf()).cookie(userA))
+        .andReturn()
+        .getResponse()
+        .getStatus();
+      if (cancelStatusA != 200) {
+        assertThat(cancelStatusA)
+          .as("whichever of A/B did not create the session cannot cancel it")
+          .isEqualTo(404);
+        cancelSession(userB, sessionId);
+      }
     } else {
       assertThat(statusA == 200 || statusB == 200)
         .as("at least one concurrent start must win")
