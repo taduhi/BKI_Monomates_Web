@@ -2,6 +2,8 @@ package com.monomates.api.bin;
 
 import com.monomates.api.bin.dto.*;
 import com.monomates.api.common.exception.*;
+import com.monomates.api.deposit.DepositSessionRepository;
+import com.monomates.api.device.DeviceRepository;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -13,15 +15,21 @@ public class BinService {
   private final RecyclingBinRepository bins;
   private final LocationRepository locations;
   private final AcceptedItemTypeRepository items;
+  private final DeviceRepository devices;
+  private final DepositSessionRepository sessions;
 
   public BinService(
     RecyclingBinRepository b,
     LocationRepository l,
-    AcceptedItemTypeRepository i
+    AcceptedItemTypeRepository i,
+    DeviceRepository d,
+    DepositSessionRepository s
   ) {
     bins = b;
     locations = l;
     items = i;
+    devices = d;
+    sessions = s;
   }
 
   @Transactional(readOnly = true)
@@ -83,20 +91,37 @@ public class BinService {
     RecyclingBin b = bins
       .findById(id)
       .orElseThrow(() -> new NotFoundException("Recycling bin was not found."));
+    String newCode = r.publicCode().trim();
     if (
-      !b.getPublicCode().equalsIgnoreCase(r.publicCode())
-    ) throw new BusinessRuleException(
-      "The public bin code cannot be changed after creation."
-    );
+      !b.getPublicCode().equalsIgnoreCase(newCode) &&
+      bins.existsByPublicCodeIgnoreCase(newCode)
+    ) throw new ConflictException("A bin already uses this public code.");
     b.getLocation().update(
       r.locationName().trim(),
       r.address().trim(),
       r.latitude(),
       r.longitude()
     );
-    b.update(r.name().trim(), r.status(), r.capacityPercent());
+    b.update(newCode, r.name().trim(), r.status(), r.capacityPercent());
     b.replaceAcceptedItems(resolve(r.acceptedItemCodes()));
     return BinResponse.from(b);
+  }
+
+  @Transactional
+  public void delete(UUID id) {
+    RecyclingBin b = bins
+      .findById(id)
+      .orElseThrow(() -> new NotFoundException("Recycling bin was not found."));
+    if (devices.existsByBin_Id(id)) throw new BusinessRuleException(
+      "This bin has a registered hardware device and cannot be deleted. Remove the device first, or set the bin to Offline instead."
+    );
+    if (sessions.existsByBin_Id(id)) throw new BusinessRuleException(
+      "This bin has deposit history and cannot be deleted. Set it to Offline instead to keep the history intact."
+    );
+    UUID locationId = b.getLocation().getId();
+    bins.delete(b);
+    bins.flush();
+    if (bins.countByLocation_Id(locationId) == 0) locations.deleteById(locationId);
   }
 
   private Set<AcceptedItemType> resolve(Set<String> cs) {

@@ -1,5 +1,5 @@
 import { requireAdmin } from "../guards/admin-guard.js";
-import { getAdminBins, saveAdminBin, updateAdminBin } from "../api/admin-api.js";
+import { getAdminBins, saveAdminBin, updateAdminBin, deleteAdminBin } from "../api/admin-api.js";
 import { ApiError } from "../api/api-client.js";
 import { escapeHtml } from "../utils/dom.js";
 import { setLoading } from "../components/loading.js";
@@ -49,7 +49,7 @@ function openEditModal(bin) {
   binModalTitle.textContent = "Edit bin";
   binName.value = bin.name;
   binPublicCode.value = bin.publicCode;
-  binPublicCode.disabled = true;
+  binPublicCode.disabled = false;
   binStatus.value = bin.status;
   binCapacity.value = String(bin.capacityPercent);
   binLocationName.value = bin.location?.name ?? "";
@@ -95,6 +95,18 @@ binSaveButton.addEventListener("click", async () => {
   }
 });
 
+async function handleDeleteBin(bin) {
+  if (!window.confirm(`Delete "${bin.name}" (${bin.publicCode}) permanently? This cannot be undone.`)) return;
+  try {
+    await deleteAdminBin(bin.id);
+    window.toast?.("Bin deleted.", "success");
+    await loadBins();
+  } catch (error) {
+    const message = error instanceof ApiError ? error.message : "Could not delete this bin.";
+    window.toast?.(message, "error");
+  }
+}
+
 function renderRow(bin) {
   const meta = statusMeta(bin.status);
   const tr = document.createElement("tr");
@@ -112,10 +124,15 @@ function renderRow(bin) {
         <button aria-label="Edit bin" class="iconbtn" type="button" title="Edit bin">
           <svg aria-hidden="true" class="ico sm" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
         </button>
+        <button aria-label="Delete bin" class="iconbtn" type="button" title="Delete bin">
+          <svg aria-hidden="true" class="ico sm" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6M10 11v6M14 11v6"></path></svg>
+        </button>
       </div>
     </td>
   `;
-  tr.querySelector(".iconbtn").addEventListener("click", () => openEditModal(bin));
+  const [editButton, deleteButton] = tr.querySelectorAll(".iconbtn");
+  editButton.addEventListener("click", () => openEditModal(bin));
+  deleteButton.addEventListener("click", () => handleDeleteBin(bin));
   return tr;
 }
 

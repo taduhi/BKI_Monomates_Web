@@ -84,7 +84,8 @@ public class RecyclingBin extends BaseEntity {
     acceptedItems.addAll(i);
   }
 
-  public void update(String n, BinStatus s, int p) {
+  public void update(String c, String n, BinStatus s, int p) {
+    publicCode = c;
     name = n;
     status = s;
     capacityPercent = p;

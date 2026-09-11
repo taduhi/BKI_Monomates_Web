@@ -11,6 +11,8 @@ public interface DepositSessionRepository
 {
   long countByUser_IdAndSessionDate(UUID userId, LocalDate date);
 
+  boolean existsByBin_Id(UUID binId);
+
   // Used only by DemoDataInitializer to avoid re-inserting the same
   // synthetic historical row on every local-profile app restart — unrelated
   // to the (removed) once-a-day-per-bin business rule.

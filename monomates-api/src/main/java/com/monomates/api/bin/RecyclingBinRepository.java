@@ -14,4 +14,6 @@ public interface RecyclingBinRepository
   List<RecyclingBin> findAll();
 
   boolean existsByPublicCodeIgnoreCase(String code);
+
+  long countByLocation_Id(UUID locationId);
 }

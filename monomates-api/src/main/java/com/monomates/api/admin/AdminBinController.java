@@ -4,6 +4,7 @@ import com.monomates.api.bin.BinService;
 import com.monomates.api.bin.dto.*;
 import jakarta.validation.Valid;
 import java.util.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,5 +33,11 @@ public class AdminBinController {
     @Valid @RequestBody SaveBinRequest r
   ) {
     return bins.update(id, r);
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    bins.delete(id);
+    return ResponseEntity.noContent().build();
   }
 }
