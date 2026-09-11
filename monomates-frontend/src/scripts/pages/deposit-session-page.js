@@ -44,10 +44,22 @@ function injectSecretSortControls() {
   // stay a harmless no-op (a 404 swallowed here) for every other account.
   const sort = async (outcome) => {
     if (!currentSession?.sessionId) return;
+    const sessionId = currentSession.sessionId;
     try {
-      await secretSort(currentSession.sessionId, outcome);
+      await secretSort(sessionId, outcome);
+      // Render the result immediately instead of waiting for the next poll
+      // tick (up to POLL_INTERVAL_MS later) — a click should feel instant.
+      renderSession(await getDepositSession(sessionId));
     } catch (error) {
-      console.error(error);
+      // A 404 here just means "this isn't the demo account" (see the secrecy
+      // note above) and must stay completely silent. Any other failure —
+      // most commonly the 60-second session window already expired before
+      // the click — is a real, demo-account-only error and must stay
+      // visible: silently swallowing it made a real rejection look
+      // identical to the button doing nothing.
+      if (error instanceof ApiError && error.status === 404) return;
+      const message = error instanceof ApiError ? error.message : "Could not resolve this deposit.";
+      window.toast?.(message, "error");
     }
   };
 
@@ -316,6 +328,43 @@ function persistSessionUrl(session) {
   backToBinLink.href = `../bins/detail.html?code=${encodeURIComponent(session.binCode)}`;
 }
 
+async function retryCurrentBin() {
+  const binCode = currentSession?.binCode || queryParam("code");
+  if (!binCode) {
+    renderScanChooser("The previous bin could not be identified. Scan its QR code again.");
+    return;
+  }
+
+  ++pollGeneration;
+  clearTimers();
+  badge.className = "badge blue";
+  badge.textContent = "Starting again…";
+  vis.className = "visual waiting";
+  vis.innerHTML = ICONS.waiting;
+  title.textContent = "Starting a new session for this bin";
+  msg.textContent = `Keeping ${binCode} selected so you can try the item again.`;
+  timer.classList.add("hidden");
+  reward.classList.add("hidden");
+  note.textContent = "Requesting a fresh deposit window…";
+  actions.innerHTML = '<button class="btn" type="button" disabled>Starting…</button>';
+  line2.textContent = "Restarting session";
+  line2m.textContent = "Using the same bin";
+  line3.textContent = "Deposit and reward";
+  line3m.textContent = "Waiting for the new session";
+
+  const url = new URL(window.location.href);
+  url.searchParams.set("code", binCode);
+  url.searchParams.delete("sessionId");
+  window.history.replaceState(null, "", url);
+  backToBinLink.href = `../bins/detail.html?code=${encodeURIComponent(binCode)}`;
+  await beginSessionForBin(binCode);
+}
+
+function renderSameBinRetryActions() {
+  actions.innerHTML = '<button class="btn" id="retryCurrentBinBtn" type="button">Try this bin again</button><a class="btn2" href="../bins/index.html">Choose another bin</a>';
+  document.getElementById("retryCurrentBinBtn").addEventListener("click", retryCurrentBin);
+}
+
 function renderSession(session) {
   currentSession = session;
 
@@ -380,7 +429,7 @@ function renderSession(session) {
     title.textContent = "No item was detected";
     msg.textContent = "The session window ended. No token was awarded.";
     note.textContent = "A QR scan alone is never enough to earn a reward.";
-    actions.innerHTML = '<a class="btn" href="../bins/index.html">Try again</a>';
+    renderSameBinRetryActions();
     line3.textContent = "0 PT awarded";
     line3m.textContent = "Session expired";
   } else if (session.status === "REJECTED") {
@@ -391,7 +440,7 @@ function renderSession(session) {
     title.textContent = "Item not accepted";
     msg.textContent = "The system could not confirm a valid deposit. No token was awarded.";
     note.textContent = "A QR scan alone is never enough to earn a reward.";
-    actions.innerHTML = '<a class="btn" href="../bins/index.html">Try again</a>';
+    renderSameBinRetryActions();
     line3.textContent = "0 PT awarded";
     line3m.textContent = "No transaction created";
   } else if (session.status === "CANCELLED") {
