@@ -67,7 +67,7 @@ public class DepositProcessingService {
     if (!s.getUser().getId().equals(user.getId())) {
       throw new NotFoundException("Deposit session was not found.");
     }
-    s.requestScan(Instant.now());
+    s.requestScan(Instant.now(), p.sessionSeconds());
     Device d = devices
       .findFirstByBin_Id(s.getBin().getId())
       .orElseThrow(() ->

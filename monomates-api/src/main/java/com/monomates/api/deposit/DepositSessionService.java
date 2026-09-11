@@ -128,7 +128,7 @@ public class DepositSessionService {
     if (s.getStatus() != SessionStatus.ACTIVE) throw new BusinessRuleException(
       "Only an active session can scan an item."
     );
-    s.requestScan(Instant.now());
+    s.requestScan(Instant.now(), p.sessionSeconds());
     return response(s);
   }
 

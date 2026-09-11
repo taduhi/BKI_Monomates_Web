@@ -86,9 +86,10 @@ public class DepositSession extends BaseEntity {
     return scanRequestedAt;
   }
 
-  public void requestScan(Instant requestedAt) {
+  public void requestScan(Instant requestedAt, long sessionSeconds) {
     if (status == SessionStatus.ACTIVE && scanRequestedAt == null) {
       scanRequestedAt = requestedAt;
+      expiresAt = requestedAt.plusSeconds(sessionSeconds);
     }
   }
 
