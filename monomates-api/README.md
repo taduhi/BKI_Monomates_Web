@@ -91,6 +91,14 @@ Admin:    admin@monomates.local / Admin123!
 Operator: operator@monomates.local / Operator123!
 ```
 
+The three hidden sort controls use this separate account:
+
+```text
+Secret controls: demo@monomates.app / monomates1
+```
+
+Override its email with `DEMO_SECRET_ACCOUNT_EMAIL` when needed.
+
 Simulated devices:
 
 ```text

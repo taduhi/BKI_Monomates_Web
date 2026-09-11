@@ -41,6 +41,7 @@ services:
       FRONTEND_ORIGIN: http://localhost:5173
       COOKIE_SECURE: "false"
       DEMO_DATA_ENABLED: "true"
+      DEMO_SECRET_ACCOUNT_EMAIL: ${DEMO_SECRET_ACCOUNT_EMAIL:-demo@monomates.app}
 
     ports:
       - "8081:8080"
