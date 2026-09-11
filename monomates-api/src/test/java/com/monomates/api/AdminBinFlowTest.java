@@ -55,12 +55,16 @@ class AdminBinFlowTest {
   @AfterEach
   void removeAnyBinLeftBehind() {
     for (UUID id : createdBinIds) {
-      jdbc.update("delete from bin_accepted_items where bin_id = ?", id);
-      jdbc.update(
-        "delete from locations where id = (select location_id from bins where id = ?)",
+      List<UUID> locationIds = jdbc.queryForList(
+        "select location_id from bins where id = ?",
+        UUID.class,
         id
       );
+      jdbc.update("delete from bin_accepted_items where bin_id = ?", id);
       jdbc.update("delete from bins where id = ?", id);
+      for (UUID locationId : locationIds) {
+        jdbc.update("delete from locations where id = ?", locationId);
+      }
     }
     createdBinIds.clear();
   }

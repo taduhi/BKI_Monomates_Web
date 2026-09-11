@@ -250,6 +250,7 @@ public class DemoDataInitializer implements ApplicationRunner {
           );
         locations.save(bin.getLocation());
         bin.update(
+          bin.getPublicCode(),
           row.required("name"),
           row.enumValue("status", BinStatus.class),
           row.intValue("capacity_percent")
