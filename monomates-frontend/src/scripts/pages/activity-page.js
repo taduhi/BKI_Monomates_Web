@@ -19,6 +19,10 @@ function depositTitle(status) {
   return "Deposit not accepted";
 }
 
+function depositIconStyle(status) {
+  return status === "ACCEPTED" ? "" : "background:#eff6ff;color:var(--primary)";
+}
+
 function buildDepositActivity(deposit, ledgerEntries) {
   const tokens = deposit.tokensAwarded ?? 0;
   const breakdown = ledgerEntries
@@ -51,7 +55,7 @@ function buildDepositActivity(deposit, ledgerEntries) {
     html: `
       <article class="card activity">
         <button class="amain" type="button" aria-expanded="false">
-          <span class="aicon">${DEPOSIT_ICON}</span>
+          <span class="aicon" style="${depositIconStyle(deposit.status)}">${DEPOSIT_ICON}</span>
           <div>
             <b>${escapeHtml(title)}</b>
             <div class="small muted">${escapeHtml(binLabel)} · ${formatDateTime(deposit.verifiedAt)}</div>
