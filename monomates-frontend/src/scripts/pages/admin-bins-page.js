@@ -30,6 +30,7 @@ let devicesByBinId = new Map();
 let configuringDevice = null;
 let selectedConnectionMode = "AUTO";
 let swapDirections = false;
+let deviceRefreshPending = false;
 
 function statusMeta(status) {
   return STATUS_META[status] ?? STATUS_META.OFFLINE;
@@ -192,17 +193,17 @@ function renderRow(bin) {
   const device = devicesByBinId.get(bin.id);
   const requestedMode = device?.connectionMode ?? "AUTO";
   const activeTransport = device?.activeTransport;
-  const heartbeatAge = device?.lastHeartbeatAt
-    ? Date.now() - new Date(device.lastHeartbeatAt).getTime()
-    : Number.POSITIVE_INFINITY;
-  const isConnected = heartbeatAge < 10_000;
-  const connectionText = activeTransport && isConnected
-    ? `${activeTransport === "WIFI" ? "Wi-Fi" : "USB"} bridge online`
-    : requestedMode === "AUTO"
-      ? "Auto"
-      : requestedMode === "WIFI"
-        ? "Wi-Fi"
-        : "USB";
+  const isConnected = Boolean(device?.bridgeOnline);
+  const connectionText = isConnected
+    ? activeTransport === "USB"
+      ? "USB connected"
+      : activeTransport === "WIFI"
+        ? "Wi-Fi listener online"
+        : "Bridge online · Detecting"
+    : "Bridge offline";
+  const modeLabel = requestedMode === "WIFI"
+    ? "Wi-Fi"
+    : requestedMode[0] + requestedMode.slice(1).toLowerCase();
   const tr = document.createElement("tr");
   tr.innerHTML = `
     <td>
@@ -213,8 +214,10 @@ function renderRow(bin) {
     <td>${bin.capacityPercent}%</td>
     <td>${escapeHtml(bin.publicCode)}</td>
     <td>
-      <div class="tt">${escapeHtml(connectionText)}</div>
-      <div class="tm">Port ${device?.bridgePort ?? 8000}</div>
+      <span class="chip ${isConnected ? "active" : "inactive"}"><span class="dot"></span>${escapeHtml(connectionText)}</span>
+      <div class="tm">Mode ${escapeHtml(modeLabel)} · Port ${device?.bridgePort ?? 8000}</div>
+      <div class="tm">${device?.lastHeartbeatAt ? `Bridge seen ${escapeHtml(formatDateTime(device.lastHeartbeatAt))}` : "Bridge has not connected yet"}</div>
+      <div class="tm">${device?.lastHardwareEventAt ? `Last hardware result ${escapeHtml(formatDateTime(device.lastHardwareEventAt))}` : "No hardware result received yet"}</div>
       ${device?.swapDirections ? '<div class="tm">Left/right swapped</div>' : ''}
     </td>
     <td>${bin.updatedAt ? formatDateTime(bin.updatedAt) : "—"}</td>
@@ -274,4 +277,19 @@ async function loadBins() {
   }
 }
 
-loadBins();
+async function refreshDeviceStatuses() {
+  if (deviceRefreshPending || document.hidden) return;
+  deviceRefreshPending = true;
+  try {
+    const devices = await getAdminDevices();
+    devicesByBinId = new Map(devices.map((device) => [device.binId, device]));
+    renderBins();
+  } catch {
+    // Preserve the last known state; the next refresh retries automatically.
+  } finally {
+    deviceRefreshPending = false;
+  }
+}
+
+await loadBins();
+setInterval(refreshDeviceStatuses, 5_000);

@@ -18,15 +18,18 @@ public class DeviceService {
   private final DeviceRepository devices;
   private final PasswordEncoder passwords;
   private final DepositSessionRepository sessions;
+  private final DeviceEventRepository events;
 
   public DeviceService(
     DeviceRepository d,
     PasswordEncoder p,
-    DepositSessionRepository sessions
+    DepositSessionRepository sessions,
+    DeviceEventRepository events
   ) {
     devices = d;
     passwords = p;
     this.sessions = sessions;
+    this.events = events;
   }
 
   @Transactional(readOnly = true)
@@ -57,10 +60,17 @@ public class DeviceService {
 
   @Transactional(readOnly = true)
   public List<DeviceConnectionResponse> listConnections() {
+    Instant now = Instant.now();
     return devices
       .findAllByOrderByDeviceCodeAsc()
       .stream()
-      .map(DeviceConnectionResponse::from)
+      .map(device ->
+        DeviceConnectionResponse.from(
+          device,
+          events.findLatestHardwareEventAt(device.getId()),
+          now
+        )
+      )
       .toList();
   }
 
@@ -80,6 +90,10 @@ public class DeviceService {
       request.acceptedDirection(),
       request.swapDirections()
     );
-    return DeviceConnectionResponse.from(device);
+    return DeviceConnectionResponse.from(
+      device,
+      events.findLatestHardwareEventAt(device.getId()),
+      Instant.now()
+    );
   }
 }

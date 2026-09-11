@@ -14,9 +14,18 @@ public record DeviceConnectionResponse(
   String acceptedDirection,
   boolean swapDirections,
   String activeTransport,
-  Instant lastHeartbeatAt
+  Instant lastHeartbeatAt,
+  boolean bridgeOnline,
+  Instant lastHardwareEventAt
 ) {
-  public static DeviceConnectionResponse from(Device device) {
+  public static DeviceConnectionResponse from(
+    Device device,
+    Instant lastHardwareEventAt,
+    Instant now
+  ) {
+    boolean bridgeOnline =
+      device.getLastHeartbeatAt() != null &&
+      device.getLastHeartbeatAt().isAfter(now.minusSeconds(10));
     return new DeviceConnectionResponse(
       device.getBin().getId(),
       device.getBin().getPublicCode(),
@@ -29,7 +38,9 @@ public record DeviceConnectionResponse(
       device.getActiveTransport() == null
         ? null
         : device.getActiveTransport().name(),
-      device.getLastHeartbeatAt()
+      device.getLastHeartbeatAt(),
+      bridgeOnline,
+      lastHardwareEventAt
     );
   }
 }
