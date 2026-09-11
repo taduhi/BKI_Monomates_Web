@@ -37,21 +37,10 @@ function injectSecretSortControls() {
     clearTimeout(pollTimeout);
     pollTimeout = null;
     try {
-      const request = (async () => {
-        if (!currentSession?.scanRequestedAt) {
-          currentSession = await requestItemScan(sessionId);
-        }
-        return secretSort(sessionId, outcome);
-      })().then(
-        (result) => ({ result }),
-        (error) => ({ error })
-      );
-      const [settled] = await Promise.all([
-        request,
-        new Promise((resolve) => setTimeout(resolve, SECRET_SORT_DELAY_MS))
-      ]);
-      if (settled.error) throw settled.error;
-      const { result } = settled;
+      if (!currentSession?.scanRequestedAt) {
+        currentSession = await requestItemScan(sessionId);
+      }
+      const result = await secretSort(sessionId, outcome);
       showPointsPopup(buttonEl, result.tokensAwarded);
       if (currentSession?.sessionId === sessionId) {
         renderSecretSortResult(outcome, result);
@@ -90,7 +79,6 @@ function showPointsPopup(anchorEl, tokensAwarded) {
 }
 
 const POLL_INTERVAL_MS = 1500;
-const SECRET_SORT_DELAY_MS = 2000;
 
 let pollTimeout;
 let countdownInterval;
