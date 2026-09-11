@@ -161,13 +161,26 @@ async function startCameraScan() {
       const result = jsQR(frame.data, frame.width, frame.height);
       const publicCode = result?.data ? extractBinCode(result.data) : null;
       if (publicCode) {
-        stopCameraScan();
-        const url = new URL(window.location.href);
-        url.searchParams.set("code", publicCode);
-        url.searchParams.delete("sessionId");
-        window.history.replaceState(null, "", url);
-        backToBinLink.href = `../bins/detail.html?code=${encodeURIComponent(publicCode)}`;
-        beginSessionForBin(publicCode);
+        // Freeze on the exact frame the code was decoded from — a still,
+        // visible capture the person can see matched, not an instant cut
+        // to the next screen — before releasing the camera and matching
+        // the decoded string against the bin's real records.
+        scanVideo.pause();
+        badge.className = "badge green";
+        badge.textContent = "QR captured";
+        title.textContent = "Matching this code to a bin…";
+        msg.textContent = `Captured code: ${publicCode}`;
+        note.textContent = "Checking this bin's records…";
+        actions.innerHTML = "";
+        setTimeout(() => {
+          stopCameraScan();
+          const url = new URL(window.location.href);
+          url.searchParams.set("code", publicCode);
+          url.searchParams.delete("sessionId");
+          window.history.replaceState(null, "", url);
+          backToBinLink.href = `../bins/detail.html?code=${encodeURIComponent(publicCode)}`;
+          beginSessionForBin(publicCode);
+        }, 600);
         return;
       }
       // A QR code was found but it isn't a MonoMates bin URL (or no code was
