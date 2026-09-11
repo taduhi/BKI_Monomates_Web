@@ -9,6 +9,22 @@ git history, kept locally for reference only (see `.gitignore`). All new
 code lives here instead; wiring it into their pipeline is a small,
 reversible edit you make yourself in their copy.
 
+## Before you start: confirm the backend has this fix live
+
+Render (the backend host) can take a while to redeploy after a push —
+sometimes minutes, occasionally much longer. Check first with:
+
+```bash
+curl -X POST https://bki-monomates-web.onrender.com/api/v1/device/events/deposit \
+  -H "Content-Type: application/json" \
+  -d "{\"deviceCode\":\"DEV-HCMUT-001\",\"deviceSecret\":\"demo-device-secret-hcmut\",\"eventId\":\"probe-1\",\"irDetected\":true,\"weightChangeGrams\":24.0,\"itemType\":\"CLEAR_PET_BOTTLE\",\"classificationConfidence\":0.95}"
+```
+
+- `"message":"No active deposit session for this bin."` → **fix is live**, proceed.
+- `"fieldErrors":{"sessionId":"must not be null"}` → **not deployed yet**, wait
+  and retry later; wiring up real hardware against the old backend will just
+  fail with this same error on every event.
+
 ## What this does
 
 `send_deposit_event.py` takes the sorting decision the hardware pipeline
