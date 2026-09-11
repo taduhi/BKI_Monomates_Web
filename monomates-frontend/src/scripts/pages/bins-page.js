@@ -110,7 +110,8 @@ function applyFilters() {
   });
   filterEmptyElement?.classList.toggle("hidden", matchCount !== 0);
 }
-window.fb = applyFilters;
+bq.addEventListener("input", applyFilters);
+bs.addEventListener("change", applyFilters);
 
 function nearbyBinsPreferenceEnabled() {
   // Mirrors the same-keyed toggle on the profile page (default on, matching

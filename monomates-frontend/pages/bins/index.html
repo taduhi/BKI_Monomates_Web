@@ -119,7 +119,7 @@
 </svg>
        — PT
       </a>
-<button class="iconbtn" onclick="toast('No new notifications.')">
+<button aria-label="Notifications" class="iconbtn" onclick="toast('No new notifications.')" type="button">
 <svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
 <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0M4 17h16M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9">
 </path>
@@ -191,9 +191,9 @@
 <path d="m21 21-4.3-4.3">
 </path>
 </svg>
-<input class="input hasicon" id="bq" oninput="fb()" placeholder="Search bin or district"/>
+<input aria-label="Search bin or district" class="input hasicon" id="bq" placeholder="Search bin or district"/>
 </div>
-<select class="select" id="bs" onchange="fb()">
+<select aria-label="Filter bins by status" class="select" id="bs">
 <option value="all">
         All statuses
        </option>

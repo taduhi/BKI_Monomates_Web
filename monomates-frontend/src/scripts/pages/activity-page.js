@@ -50,14 +50,14 @@ function buildDepositActivity(deposit, ledgerEntries) {
     searchKey: `${title} ${binLabel}`.toLowerCase(),
     html: `
       <article class="card activity">
-        <div class="amain" onclick="this.parentElement.classList.toggle('open')">
+        <button class="amain" type="button" aria-expanded="false">
           <span class="aicon">${DEPOSIT_ICON}</span>
           <div>
             <b>${escapeHtml(title)}</b>
             <div class="small muted">${escapeHtml(binLabel)} · ${formatDateTime(deposit.verifiedAt)}</div>
           </div>
           <div class="amount" style="${tokens > 0 ? "color:#15803d" : ""}">${tokens > 0 ? "+" : ""}${tokens} PT</div>
-        </div>
+        </button>
         <div class="details2">
           <div class="card" style="box-shadow:none;background:#f8fafc">${breakdown}</div>
         </div>
@@ -75,14 +75,14 @@ function buildRedemptionActivity(entry) {
     searchKey: title.toLowerCase(),
     html: `
       <article class="card activity">
-        <div class="amain" onclick="this.parentElement.classList.toggle('open')">
+        <button class="amain" type="button" aria-expanded="false">
           <span class="aicon" style="background:#eff6ff;color:var(--primary)">${REDEMPTION_ICON}</span>
           <div>
             <b>${escapeHtml(title)}</b>
             <div class="small muted">${formatDateTime(entry.createdAt)}</div>
           </div>
           <div class="amount">${entry.amount} PT</div>
-        </div>
+        </button>
         <div class="details2">
           <div class="card" style="box-shadow:none;background:#f8fafc">
             <div class="drow">
@@ -118,7 +118,16 @@ function filterActivity() {
   }
   alist.innerHTML = visible.map((item) => item.html).join("");
 }
-window.fa = filterActivity;
+aq.addEventListener("input", filterActivity);
+atype.addEventListener("change", filterActivity);
+asort.addEventListener("change", filterActivity);
+alist.addEventListener("click", (event) => {
+  const button = event.target.closest(".amain");
+  if (!button) return;
+  const activity = button.closest(".activity");
+  const expanded = activity.classList.toggle("open");
+  button.setAttribute("aria-expanded", String(expanded));
+});
 
 async function load() {
   try {

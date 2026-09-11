@@ -99,7 +99,7 @@
       </div>
 </div>
 <div class="topactions">
-<button class="iconbtn" onclick="toast('No new notifications.')">
+<button aria-label="Notifications" class="iconbtn" onclick="toast('No new notifications.')" type="button">
 <svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
 <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0M4 17h16M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9">
 </path>
@@ -194,7 +194,7 @@
         Disabling preserves historical transactions.
        </p>
 </div>
-<button class="btn" id="addBinButton">
+<button class="btn" disabled id="addBinButton" type="button">
 <svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
 <path d="M12 5v14M5 12h14">
 </path>
@@ -268,7 +268,7 @@
 <h3 id="binModalTitle">
          Add bin
         </h3>
-<button class="iconbtn" onclick="closeModal('bm')">
+<button aria-label="Close bin editor" class="iconbtn" onclick="closeModal('bm')" type="button">
 <svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
 <path d="M18 6 6 18M6 6l12 12">
 </path>

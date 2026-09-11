@@ -119,7 +119,7 @@
 </svg>
        — PT
       </a>
-<button class="iconbtn" onclick="toast('No new notifications.')">
+<button aria-label="Notifications" class="iconbtn" onclick="toast('No new notifications.')" type="button">
 <svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
 <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0M4 17h16M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9">
 </path>
@@ -396,7 +396,7 @@
         Report fullness, damage, QR issues, or a wrong location.
        </div>
 </div>
-<button class="btn2" onclick="openModal('report')">
+<button class="btn2" onclick="openModal('report')" type="button">
 <svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
 <path d="M10.3 2.6 1.8 17a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 2.6a2 2 0 0 0-3.4 0ZM12 9v4M12 17h.01">
 </path>
@@ -410,7 +410,7 @@
 <h3>
          Report a problem
         </h3>
-<button class="iconbtn" onclick="closeModal('report')">
+<button aria-label="Close problem reporting dialog" class="iconbtn" onclick="closeModal('report')" type="button">
 <svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
 <path d="M18 6 6 18M6 6l12 12">
 </path>
@@ -418,38 +418,13 @@
 </button>
 </div>
 <div class="modalbody">
-<div class="field">
-<label>
-          Problem type
-         </label>
-<select class="select">
-<option>
-           Bin is full
-          </option>
-<option>
-           Bin is broken
-          </option>
-<option>
-           QR damaged
-          </option>
-<option>
-           Wrong location
-          </option>
-</select>
-</div>
-<div class="field" style="margin-top:14px">
-<label>
-          Description
-         </label>
-<textarea class="textarea" placeholder="Add a short description"></textarea>
-</div>
+<div class="card" style="box-shadow:none;background:#f8fafc">
+         Problem reporting is not available in this prototype yet. No information is being collected or submitted from this screen.
+        </div>
 </div>
 <div class="modalfoot">
-<button class="btn2" onclick="closeModal('report')">
-         Cancel
-        </button>
-<button class="btn" onclick="closeModal('report');toast('Problem reporting is planned for a later prototype.')">
-         Continue later
+<button class="btn" onclick="closeModal('report')" type="button">
+         Close
         </button>
 </div>
 </div>

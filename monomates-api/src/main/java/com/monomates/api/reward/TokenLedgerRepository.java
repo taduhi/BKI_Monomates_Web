@@ -25,6 +25,7 @@ public interface TokenLedgerRepository
 
   @EntityGraph(
     attributePaths = {
+      "user",
       "deposit",
       "deposit.session",
       "deposit.session.bin",

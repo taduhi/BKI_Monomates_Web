@@ -2,7 +2,7 @@ import { requireAuthentication } from "../guards/auth-guard.js";
 import { getVouchers, redeemVoucher, getTokenBalance, getRedemptions } from "../api/rewards-api.js";
 import { ApiError } from "../api/api-client.js";
 import { renderTokenBalancePill } from "../components/token-balance.js";
-import { lockModal, unlockModal } from "../components/modal.js";
+import { closeModal, lockModal, openModal, unlockModal } from "../components/modal.js";
 import { setLoading } from "../components/loading.js";
 import { escapeHtml } from "../utils/dom.js";
 import { formatDateTime } from "../utils/date.js";
@@ -14,10 +14,26 @@ const VOUCHER_ICON = '<svg aria-hidden="true" class="ico xl" viewBox="0 0 24 24"
 
 let currentBalance = 0;
 let selectedVoucher = null;
+const rewardsSearch = document.getElementById("rq");
+const rewardsAvailability = document.getElementById("ra");
+const rewardsGrid = document.getElementById("vg");
+const rewardsBalanceHeading = document.getElementById("rewardsBalanceHeading");
+const myRedemptions = document.getElementById("myRedemptions");
+const redemptionName = document.getElementById("rname");
+const redemptionCurrentBalance = document.getElementById("rcurrentBalance");
+const redemptionCost = document.getElementById("rcost");
+const redemptionRemaining = document.getElementById("rremain");
+const redemptionExpiry = document.getElementById("rExpiry");
+const redemptionCondition = document.getElementById("rCondition");
+const redemptionConfirmPanel = document.getElementById("confirm");
+const redemptionDonePanel = document.getElementById("done");
+const redemptionFooter = document.getElementById("rf");
+const redemptionCode = document.getElementById("rcode");
+const redemptionDoneInstructions = document.getElementById("rDoneInstructions");
 
 function filterRewards() {
-  const query = rq.value.trim().toLowerCase();
-  const availability = ra.value;
+  const query = rewardsSearch.value.trim().toLowerCase();
+  const availability = rewardsAvailability.value;
   document.querySelectorAll(".voucher").forEach((card) => {
     const cost = Number(card.dataset.cost);
     const canRedeem = card.dataset.canRedeem === "true";
@@ -27,7 +43,8 @@ function filterRewards() {
     card.classList.toggle("hidden", !matches);
   });
 }
-window.fr = filterRewards;
+rewardsSearch.addEventListener("input", filterRewards);
+rewardsAvailability.addEventListener("change", filterRewards);
 
 function updateBalanceHeading() {
   rewardsBalanceHeading.textContent = `${currentBalance} PT available`;
@@ -72,15 +89,16 @@ function renderVoucherCard(voucher, redemptions) {
 
 function openRedemption(voucher) {
   selectedVoucher = voucher;
-  rname.textContent = voucher.title;
-  rcurrentBalance.textContent = `${currentBalance} PT`;
-  rcost.textContent = `${voucher.tokenCost} PT`;
-  rremain.textContent = `${currentBalance - voucher.tokenCost} PT`;
-  rExpiry.textContent = voucher.validUntil ? formatDateTime(voucher.validUntil) : "No expiry";
-  rCondition.textContent = voucher.redemptionInstructions ?? "Show the issued code at the partner counter.";
-  confirm.style.display = "block";
-  done.classList.add("hidden");
-  rf.innerHTML = '<button class="btn2" onclick="closeModal(\'redeem\')">Cancel</button><button class="btn" id="confirm-redemption">Confirm</button>';
+  redemptionName.textContent = voucher.title;
+  redemptionCurrentBalance.textContent = `${currentBalance} PT`;
+  redemptionCost.textContent = `${voucher.tokenCost} PT`;
+  redemptionRemaining.textContent = `${currentBalance - voucher.tokenCost} PT`;
+  redemptionExpiry.textContent = voucher.validUntil ? formatDateTime(voucher.validUntil) : "No expiry";
+  redemptionCondition.textContent = voucher.redemptionInstructions ?? "Show the issued code at the partner counter.";
+  redemptionConfirmPanel.style.display = "block";
+  redemptionDonePanel.classList.add("hidden");
+  redemptionFooter.innerHTML = '<button class="btn2" id="cancel-redemption" type="button">Cancel</button><button class="btn" id="confirm-redemption" type="button">Confirm</button>';
+  document.getElementById("cancel-redemption").addEventListener("click", () => closeModal("redeem"));
   document.getElementById("confirm-redemption").addEventListener("click", handleConfirmRedeem);
   openModal("redeem");
 }
@@ -94,11 +112,12 @@ async function handleConfirmRedeem() {
   lockModal("redeem");
   try {
     const redemption = await redeemVoucher(selectedVoucher.id);
-    confirm.style.display = "none";
-    done.classList.remove("hidden");
-    rcode.textContent = redemption.redemptionCode;
-    rDoneInstructions.textContent = redemption.redemptionInstructions ?? "Show this code at the partner counter.";
-    rf.innerHTML = '<button class="btn" onclick="closeModal(\'redeem\')">Done</button>';
+    redemptionConfirmPanel.style.display = "none";
+    redemptionDonePanel.classList.remove("hidden");
+    redemptionCode.textContent = redemption.redemptionCode;
+    redemptionDoneInstructions.textContent = redemption.redemptionInstructions ?? "Show this code at the partner counter.";
+    redemptionFooter.innerHTML = '<button class="btn" id="close-redemption" type="button">Done</button>';
+    document.getElementById("close-redemption").addEventListener("click", () => closeModal("redeem"));
     currentBalance = redemption.remainingBalance;
     updateBalanceHeading();
     renderTokenBalancePill();
@@ -111,7 +130,6 @@ async function handleConfirmRedeem() {
     unlockModal("redeem");
   }
 }
-window.redeem = openRedemption;
 
 function renderRedemptions(redemptions) {
   if (redemptions.length === 0) {
@@ -142,17 +160,17 @@ async function loadVouchers() {
     currentBalance = balance.balance;
     updateBalanceHeading();
     if (vouchers.length === 0) {
-      vg.innerHTML = '<div class="card empty"><p class="muted">No rewards are available right now.</p></div>';
+      rewardsGrid.innerHTML = '<div class="card empty"><p class="muted">No rewards are available right now.</p></div>';
       renderRedemptions(redemptions);
       return;
     }
-    vg.innerHTML = "";
-    vouchers.forEach((voucher) => vg.appendChild(renderVoucherCard(voucher, redemptions)));
+    rewardsGrid.innerHTML = "";
+    vouchers.forEach((voucher) => rewardsGrid.appendChild(renderVoucherCard(voucher, redemptions)));
     filterRewards();
     renderRedemptions(redemptions);
   } catch (error) {
     const message = error instanceof ApiError ? error.message : "Could not load rewards.";
-    vg.innerHTML = `<div class="card empty"><p class="muted">${escapeHtml(message)}</p></div>`;
+    rewardsGrid.innerHTML = `<div class="card empty"><p class="muted">${escapeHtml(message)}</p></div>`;
   }
 }
 

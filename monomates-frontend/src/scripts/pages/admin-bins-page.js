@@ -6,6 +6,7 @@ import { setLoading } from "../components/loading.js";
 import { formatDateTime } from "../utils/date.js";
 
 await requireAdmin();
+addBinButton.disabled = false;
 
 const ACCEPTED_ITEM_CODES = ["CLEAR_PET_BOTTLE"];
 
@@ -108,7 +109,7 @@ function renderRow(bin) {
     <td>${bin.updatedAt ? formatDateTime(bin.updatedAt) : "—"}</td>
     <td>
       <div class="actions">
-        <button class="iconbtn" type="button" title="Edit bin">
+        <button aria-label="Edit bin" class="iconbtn" type="button" title="Edit bin">
           <svg aria-hidden="true" class="ico sm" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
         </button>
       </div>

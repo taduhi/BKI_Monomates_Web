@@ -6,6 +6,7 @@ import { setLoading } from "../components/loading.js";
 import { formatDateTime } from "../utils/date.js";
 
 await requireAdmin();
+addVoucherButton.disabled = false;
 
 const STATUS_META = {
   ACTIVE: { label: "Active", chipClass: "active" },
@@ -73,8 +74,19 @@ function toIsoDateTime(value) {
 
 addVoucherButton.addEventListener("click", openCreateModal);
 
+function validateVoucherDates() {
+  const invalid = voucherValidFrom.value && voucherValidUntil.value &&
+    new Date(voucherValidUntil.value) <= new Date(voucherValidFrom.value);
+  voucherValidUntil.setCustomValidity(invalid ? "Expiry date must be after the valid-from date." : "");
+  return !invalid;
+}
+
+voucherValidFrom.addEventListener("change", validateVoucherDates);
+voucherValidUntil.addEventListener("change", validateVoucherDates);
+
 voucherSaveButton.addEventListener("click", async () => {
   hideFormError();
+  validateVoucherDates();
   if (!voucherForm.reportValidity()) return;
   const payload = {
     partnerName: voucherPartnerName.value.trim(),
@@ -121,7 +133,7 @@ function renderRow(voucher) {
     <td>${voucher.inventory}</td>
     <td>${voucher.validUntil ? formatDateTime(voucher.validUntil) : "No expiry"}</td>
     <td>
-      <button class="iconbtn" type="button" title="Edit voucher">
+      <button aria-label="Edit voucher" class="iconbtn" type="button" title="Edit voucher">
         <svg aria-hidden="true" class="ico sm" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
       </button>
     </td>

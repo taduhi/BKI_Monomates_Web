@@ -119,7 +119,7 @@
 </svg>
        — PT
       </a>
-<button class="iconbtn" onclick="toast('No new notifications.')">
+<button aria-label="Notifications" class="iconbtn" onclick="toast('No new notifications.')" type="button">
 <svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
 <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0M4 17h16M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9">
 </path>
@@ -214,9 +214,9 @@
 <path d="m21 21-4.3-4.3">
 </path>
 </svg>
-<input class="input hasicon" id="aq" oninput="fa()" placeholder="Search activity"/>
+<input aria-label="Search activity" class="input hasicon" id="aq" placeholder="Search activity"/>
 </div>
-<select class="select" id="atype" onchange="fa()">
+<select aria-label="Filter activity by type" class="select" id="atype">
 <option value="all">
         All activity
        </option>
@@ -227,7 +227,7 @@
         Spent
        </option>
 </select>
-<select class="select" id="asort" onchange="fa()">
+<select aria-label="Sort activity" class="select" id="asort">
 <option value="newest">
         Newest first
        </option>

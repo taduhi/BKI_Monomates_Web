@@ -77,35 +77,35 @@
 <p class="muted" id="as">
       Sign in to manage your tokens and deposit sessions.
      </p>
-<div class="tabs">
-<button class="tab active" id="lt" onclick="auth('login')">
+<div aria-label="Authentication mode" class="tabs" role="tablist">
+<button aria-selected="true" class="tab active" id="lt" role="tab" type="button">
        Log in
       </button>
-<button class="tab" id="st" onclick="auth('signup')">
+<button aria-selected="false" class="tab" id="st" role="tab" type="button">
        Create account
       </button>
 </div>
 <form class="form" id="authForm">
 <p class="field-error hidden" id="formError" role="alert"></p>
 <div class="field hidden" id="nf">
-<label>
+<label for="fullName">
         Full name
        </label>
-<input class="input" id="fullName" placeholder="Your full name"/>
+<input autocomplete="name" class="input" id="fullName" placeholder="Your full name"/>
 </div>
 <div class="field">
-<label>
+<label for="email">
         Email
        </label>
-<input class="input" id="email" required="" type="email"/>
+<input autocomplete="email" class="input" id="email" required="" type="email"/>
 </div>
 <div class="field">
-<label>
+<label for="pw">
         Password
        </label>
 <div class="pw">
-<input class="input" id="pw" required="" type="password"/>
-<button onclick="pw.type=pw.type==='password'?'text':'password'" type="button">
+<input autocomplete="current-password" class="input" id="pw" required="" type="password"/>
+<button aria-label="Show password" aria-pressed="false" id="passwordToggle" type="button">
 <svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
 <path d="M2.1 12a10.5 10.5 0 0 1 19.8 0 10.5 10.5 0 0 1-19.8 0">
 </path>

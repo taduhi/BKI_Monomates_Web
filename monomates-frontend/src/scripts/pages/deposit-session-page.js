@@ -91,6 +91,26 @@ function renderError(message, options = {}) {
     : '<a class="btn" href="../bins/index.html">Back to bins</a>';
 }
 
+function renderBinChooser() {
+  clearTimers();
+  badge.className = "badge gray";
+  badge.textContent = "Choose a bin";
+  vis.className = "visual waiting";
+  vis.innerHTML = ICONS.waiting;
+  title.textContent = "Select an available smart bin";
+  msg.textContent = "Open a bin's details and scan its QR code to begin a deposit session.";
+  timer.classList.add("hidden");
+  reward.classList.add("hidden");
+  note.textContent = "A session only starts after a specific bin has been selected.";
+  actions.innerHTML = '<a class="btn" href="../bins/index.html">Browse available bins</a>';
+  line1.textContent = "Choose a bin";
+  line1m.textContent = "Find an available location";
+  line2.textContent = "Scan its QR code";
+  line2m.textContent = "Start from the bin details page";
+  line3.textContent = "Deposit and reward";
+  line3m.textContent = "Available after a session starts";
+}
+
 function startCountdown(startedAtIso, expiresAtIso) {
   clearInterval(countdownInterval);
   const startedAt = new Date(startedAtIso).getTime();
@@ -244,7 +264,7 @@ async function init() {
   const publicCode = queryParam("code");
   const existingSessionId = queryParam("sessionId");
   if (!publicCode && !existingSessionId) {
-    renderError("No bin was specified. Scan a bin's QR code or open it from the bins list.");
+    renderBinChooser();
     return;
   }
   if (publicCode) {

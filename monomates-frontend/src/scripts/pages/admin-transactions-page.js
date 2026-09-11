@@ -19,6 +19,7 @@ const TYPE_META = {
 let allEntries = [];
 let filteredEntries = [];
 let currentPage = 1;
+const exportTransactionsButton = document.getElementById("exportTransactionsButton");
 
 function typeMeta(type) {
   return TYPE_META[type] ?? { label: type, badgeClass: "gray" };
@@ -35,7 +36,8 @@ function applyFilters() {
   currentPage = 1;
   renderPage();
 }
-window.txFilter = applyFilters;
+txSearch.addEventListener("input", applyFilters);
+txType.addEventListener("change", applyFilters);
 
 function renderRow(entry) {
   const meta = typeMeta(entry.type);
@@ -52,7 +54,7 @@ function renderRow(entry) {
     <td style="${entry.amount > 0 ? "color:#15803d" : ""}"><b>${entry.amount > 0 ? "+" : ""}${entry.amount} PT</b></td>
     <td>${formatDateTime(entry.createdAt)}</td>
     <td>
-      <button class="iconbtn" type="button" title="View detail">
+      <button aria-label="View transaction detail" class="iconbtn" type="button" title="View detail">
         <svg aria-hidden="true" class="ico sm" viewBox="0 0 24 24"><path d="M2.1 12a10.5 10.5 0 0 1 19.8 0 10.5 10.5 0 0 1-19.8 0"></path><circle cx="12" cy="12" r="3"></circle></svg>
       </button>
     </td>
@@ -109,6 +111,41 @@ txNextPage.addEventListener("click", () => {
   renderPage();
 });
 
+function csvCell(value) {
+  const text = String(value ?? "");
+  return `"${text.replaceAll('"', '""')}"`;
+}
+
+function exportTransactions() {
+  if (filteredEntries.length === 0) {
+    window.toast?.("There are no matching transactions to export.", "error");
+    return;
+  }
+  const headings = ["Entry ID", "Date", "Type", "Amount (PT)", "User", "Email", "Bin", "Voucher", "Description"];
+  const rows = filteredEntries.map((entry) => [
+    entry.id,
+    entry.createdAt,
+    typeMeta(entry.type).label,
+    entry.amount,
+    entry.userFullName,
+    entry.userEmail,
+    entry.binCode,
+    entry.voucherTitle,
+    entry.description
+  ]);
+  const csv = [headings, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
+  const url = URL.createObjectURL(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `monomates-transactions-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+exportTransactionsButton.addEventListener("click", exportTransactions);
+
 async function load() {
   txCountLabel.textContent = "Loading…";
   try {
@@ -124,6 +161,7 @@ async function load() {
     txRedeemedValue.textContent = `${redeemedThisMonth} PT`;
     txTotalValue.textContent = String(allEntries.length);
     applyFilters();
+    exportTransactionsButton.disabled = false;
   } catch (error) {
     const message = error instanceof ApiError ? error.message : "Could not load transactions.";
     txTableBody.innerHTML = `<tr><td colspan="7"><p class="muted">${escapeHtml(message)}</p></td></tr>`;
@@ -133,7 +171,7 @@ async function load() {
 
 function sameMonth(isoDate, reference) {
   const date = new Date(isoDate);
-  return date.getUTCFullYear() === reference.getUTCFullYear() && date.getUTCMonth() === reference.getUTCMonth();
+  return date.getFullYear() === reference.getFullYear() && date.getMonth() === reference.getMonth();
 }
 
 load();

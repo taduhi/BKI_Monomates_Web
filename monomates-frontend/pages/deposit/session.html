@@ -119,7 +119,7 @@
 </svg>
        — PT
       </a>
-<button class="iconbtn" onclick="toast('No new notifications.')">
+<button aria-label="Notifications" class="iconbtn" onclick="toast('No new notifications.')" type="button">
 <svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
 <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0M4 17h16M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9">
 </path>
@@ -202,10 +202,10 @@
         </h3>
 <div class="timeline" style="margin-top:16px">
 <div>
-<b>
+<b id="line1">
            QR scanned
           </b>
-<div class="small muted">
+<div class="small muted" id="line1m">
            Session created
           </div>
 </div>

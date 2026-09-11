@@ -171,6 +171,13 @@ class EndToEndFlowTest {
       .andReturn();
     assertThat(deposits.getResponse().getContentAsString()).contains("\"tokensAwarded\":2");
 
+    MvcResult ledger = mvc
+      .perform(get("/api/v1/users/me/token-ledger").cookie(auth))
+      .andExpect(status().isOk())
+      .andReturn();
+    assertThat(ledger.getResponse().getContentAsString())
+      .contains(email, "DEPOSIT_BASE", "PET_BONUS");
+
     // 7. Admin creates a voucher this user can just afford.
     MvcResult adminLogin = mvc
       .perform(

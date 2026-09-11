@@ -99,7 +99,7 @@
       </div>
 </div>
 <div class="topactions">
-<button class="iconbtn" onclick="toast('No new notifications.')">
+<button aria-label="Notifications" class="iconbtn" onclick="toast('No new notifications.')" type="button">
 <svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
 <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0M4 17h16M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9">
 </path>
@@ -196,7 +196,7 @@
         Confirmed token transactions are the balance source of truth.
        </p>
 </div>
-<button class="btn2" onclick="toast('CSV export is a visual placeholder.')">
+<button class="btn2" disabled id="exportTransactionsButton" type="button">
 <svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4m4-5 5 5 5-5M12 15V3">
 </path>
@@ -212,9 +212,9 @@
 <path d="m21 21-4.3-4.3">
 </path>
 </svg>
-<input class="input hasicon" id="txSearch" oninput="txFilter()" placeholder="Search user, bin, or voucher"/>
+<input aria-label="Search transactions" class="input hasicon" id="txSearch" placeholder="Search user, bin, or voucher"/>
 </div>
-<select class="select" id="txType" onchange="txFilter()">
+<select aria-label="Filter transactions by type" class="select" id="txType">
 <option value="all">
         All types
        </option>
@@ -289,7 +289,7 @@
 <h3 id="txDetailTitle" style="margin-top:10px">
 </h3>
 </div>
-<button class="iconbtn" onclick="closeModal('tm')">
+<button aria-label="Close transaction detail" class="iconbtn" onclick="closeModal('tm')" type="button">
 <svg aria-hidden="true" class="ico" viewbox="0 0 24 24">
 <path d="M18 6 6 18M6 6l12 12">
 </path>
