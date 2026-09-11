@@ -37,9 +37,9 @@ function renderAcceptedItems(items) {
     .map(
       (item) => `
         <div class="card green" style="box-shadow:none;margin-top:14px">
-          <span class="badge green">Accepted for extra token</span>
+          <span class="badge green">Eligible for a reward</span>
           <h3 class="ctitle" style="margin-top:10px">${escapeHtml(item.name)}</h3>
-          <p class="small muted">${escapeHtml(item.description ?? "")} Only an accepted item earns a reward: +${item.bonusTokens} PT.</p>
+          <p class="small muted">${escapeHtml(item.description ?? "")} Earn +${item.bonusTokens} PT when this item is accepted.</p>
         </div>
       `
     )
